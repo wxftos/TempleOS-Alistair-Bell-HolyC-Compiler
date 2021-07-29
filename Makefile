@@ -3,6 +3,9 @@ HOLYC_SOURCES = src/main.c
 HOLYC_OBJECTS = ${HOLYC_SOURCES:.c=.o}
 HOLYC_TARGET  = holyc-compiler # like cc but for holyc
 
+INSTALL_DIR   = /usr/bin
+
+
 all: ${HOLYC_TARGET}
 
 # source objs
@@ -18,7 +21,15 @@ clean:
 	@echo "rm      ${HOLYC_OBJECTS}"
 	@rm ${HOLYC_OBJECTS}
 	
+install:
+	@echo "cp      ${HOLYC_TARGET} -> ${INSTALL_DIR}"
+	@cp ${HOLYC_TARGET} ${INSTALL_DIR}/
+	@echo "finished installing ${HOLYC_TARGET}"
 
-.PHONY: clean install
+uninstall:
+	@rm ${INSTALL_DIR}/${HOLYC_TARGET}
+	@echo "rm      ${INSTALL_DIR}/${HOLYC_TARGET}"
+
+.PHONY: clean install uninstall
 
 
