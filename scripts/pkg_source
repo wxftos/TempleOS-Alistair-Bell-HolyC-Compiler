@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Note this does not create a netbsd pkgsource pacakge!
+src_dir=$(pwd  | sed 's/^.*\///')
+src_ver=$(make version)
+src_out=holyc-sources.$src_ver.tar.xz
+
+make clean
+
+cd ../ 
+
+tar -cf $src_out $src_dir
+mv $src_out $src_dir
+
+cd $(pwd)
