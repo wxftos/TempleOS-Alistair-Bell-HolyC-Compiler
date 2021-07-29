@@ -58,6 +58,7 @@ main(int argc, const char **args)
 	char *chars = NULL;
 	uint32_t char_count = 0;
 	if (holyc_handle_file(target, "r", &chars , &char_count) != 0) {
+		fprintf(stderr, "holyc: error failed to compile %s, stage 1 failed.\n", target);
 		return 1;
 	}
 
@@ -69,7 +70,8 @@ main(int argc, const char **args)
 	struct holyc_token *tokens;
 	uint32_t token_count;
 	if (holyc_parse_stream(chars, char_count, &tokens, &token_count) != 0) {
-		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed\n", target);
+		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
+		return 1;
 	}
 
 	free(chars);
