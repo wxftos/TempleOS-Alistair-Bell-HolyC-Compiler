@@ -1,7 +1,9 @@
 #include "inc.h"
+#include "util.h"
+#include "parser.h"
 
 static int8_t 
-holyc_handle_file(const char *file, const char *mode, char **char_buffer, int32_t *char_count)
+holyc_handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *char_count)
 {
 	/* Stat the file to check that it exists. */
 	struct stat st;
@@ -51,14 +53,25 @@ main(int argc, const char **args)
 	/* Read the source file.
 	 * Fetch the bytes that we can parse.
 	 */
+	const char *target = args[1];
 
-	char *bytes = NULL;
-	int32_t chars = 0;
-	if (holyc_handle_file(args[1], "r", &bytes, &chars) != 0) {
+	char *chars = NULL;
+	uint32_t char_count = 0;
+	if (holyc_handle_file(target, "r", &chars , &char_count) != 0) {
 		return 1;
 	}
-	fprintf(stdout, "Bytes:\n%s", bytes);
 
-	free(bytes);
+	/* 
+     * Parse the file into tokens of words.
+     * Search the words for special chars and then create new tokens.
+	 */
+
+	struct holyc_token *tokens;
+	uint32_t token_count;
+	if (holyc_parse_stream(chars, char_count, &tokens, &token_count) != 0) {
+		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed\n", target);
+	}
+
+	free(chars);
 	return 0;
 }

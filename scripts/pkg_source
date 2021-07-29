@@ -9,6 +9,7 @@ make clean
 
 cd ../ 
 
+rm -f $src_dir/*.tar.xz
 tar -cf $src_out $src_dir
 mv $src_out $src_dir
 
