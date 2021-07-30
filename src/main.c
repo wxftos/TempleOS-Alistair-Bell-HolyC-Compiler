@@ -31,7 +31,7 @@ holyc_handle_file(const char *file, const char *mode, char **char_buffer, uint32
 	/* 
 	 * Allocate the buffer's memory.
 	 * Zero the new memory.
-	 * fread into the buffer returning success
+	 * fread into the buffer returning success.
 	*/
 	size_t buffer_size = sizeof(*char_buffer) * (*char_count);
 	*char_buffer = (char *)malloc(buffer_size);
@@ -44,7 +44,7 @@ holyc_handle_file(const char *file, const char *mode, char **char_buffer, uint32
 int
 main(int argc, const char **args)
 {
-	/* Check that we actually got an argument */
+	/* Check that we actually got an argument. */
 	if (argc < 2) {
 		fprintf(stderr, "holyc: error no input files!\n");
 		return 1;
