@@ -1,16 +1,26 @@
 #!/bin/sh
 
 # Note this does not create a netbsd pkgsource pacakge!
+
+# Gets the directory of the sources.
 src_dir=$(pwd  | sed 's/^.*\///')
+# Version to package the sources as, uses `make version`.
 src_ver=$(make version)
+# Targball name.
 src_out=holyc-sources.$src_ver.tar.xz
 
 make clean
 
 cd ../ 
 
+# Clean old archives.
 rm -f $src_dir/*.tar.xz
+# Create the new archive and move to the source directory
 tar -cf $src_out $src_dir
 mv $src_out $src_dir
 
-cd $(pwd)
+cd $src_dir
+
+# Generate a md5sum of all the targball
+md5sum $src_out > checksums.txt
+

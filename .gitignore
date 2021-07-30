@@ -1,3 +1,4 @@
 holyc-compiler
 *.o
 *.tar*
+checksums.txt
