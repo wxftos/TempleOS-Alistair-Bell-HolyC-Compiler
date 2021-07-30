@@ -1,7 +1,2 @@
-
-U32 
-main() 
-{
-	return 10 * 10;
-}
-main;
+			U32				main() {}
+		main;
