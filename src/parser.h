@@ -7,10 +7,14 @@ enum holyc_parse_type {
 	/* Junk means non special to the parser, regular chars, used for starting tokens after specials. */
 	HOLYC_PARSE_TYPE_JUNK,
 	/* Includes spacees, newlines and tabs, also used for ending tokens. */
-	HOLYC_PARSE_TYPE_WHITEPSACE,
+	HOLYC_PARSE_TYPE_WHITESPACE,
 	/* Special includes grammer of the language and will split up tokens if found within (depends on mode). */
 	HOLYC_PARSE_TYPE_SPECIAL,
 };
+
+/* Tempory chars buffer amount of char count. */
+#define HOLYC_UNDER_CONSTRUCTION_COUNT 64
+
 
 /* 
  * This is a function used by the parser to determine whether the char is special and requires it's own token.
@@ -48,6 +52,21 @@ struct holyc_token {
 
 /* Turns the streams into tokens, populates the structures */
 int8_t holyc_parse_stream(char *, uint32_t, struct holyc_token **, uint32_t *);
+/* 
+ * Default mode used when string, comment or char mode are inactive.
+ * Reports all special characters and grammer within the language.
+ * Will recognise when to change modes and how to handle the new tokens.
+ */
+enum holyc_parse_type holyc_parse_mode_default(char, uint64_t, char *, void *, void **);
+/* 
+ * String mode, activated when a new '"' is found in the buffer.
+ * Rules:
+ *      whitespace is ignored and not cared for,
+ *      special chars (operators, colons and grammer) are ignored,
+ */
+enum holyc_parse_type holyc_parse_mode_string(char, uint64_t, char *, void *, void **);
+enum holyc_parse_type holyc_parse_mode_comment(char, uint64_t, char *, void *, void **);
+
 
 
 #endif
