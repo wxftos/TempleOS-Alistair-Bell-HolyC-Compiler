@@ -13,7 +13,7 @@ enum holyc_parse_type {
 };
 
 /* Tempory chars buffer amount of char count. */
-#define HOLYC_UNDER_CONSTRUCTION_COUNT 64
+#define HOLYC_UNDER_CONSTRUCTION_SIZE 64 * sizeof(char)
 
 
 /* 
@@ -37,8 +37,8 @@ struct holyc_token {
 	uint64_t start_char_index;
 };
 
-/* Turns the streams into tokens, populates the structures */
-int8_t holyc_parse_stream(char *, uint32_t, struct holyc_token **, uint32_t *);
+/* Turns the chars into tokens, populates the structures */
+int8_t holyc_parse_chars(char *, uint32_t, struct holyc_token **, uint32_t *);
 
 
 #endif

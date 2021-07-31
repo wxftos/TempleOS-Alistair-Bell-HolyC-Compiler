@@ -70,7 +70,7 @@ main(int argc, const char **args)
 	struct holyc_token *tokens;
 	uint32_t token_count;
 	if (char_count > 0) {
-		if (holyc_parse_stream(chars, char_count, &tokens, &token_count) != 0) {
+		if (holyc_parse_chars(chars, char_count, &tokens, &token_count) != 0) {
 			fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
 			return 1;
 		}
