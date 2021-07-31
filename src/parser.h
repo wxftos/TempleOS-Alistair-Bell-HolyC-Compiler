@@ -17,19 +17,6 @@ enum holyc_parse_type {
 
 
 /* 
- * This is a function used by the parser to determine whether the char is special and requires it's own token.
- * If a token changes the interpreter mode (str or comment) then the callback is changed to account for this.
- * Params:
- *		1: current character being analyased,
- *      2: index along the buffer (right claw of the pinsor),
- *		3: the entire source (if previous lookup required),
- *      4: extra data the the mode may be interested in, (e.g. comment mode single line vs multi)
- *		5: pointer to the next function pointer to be used for analyses, updated if analysing requires it.
- * The function pointer pointer is generic but the implimentation must use the correct typing else trouble is inevitable. 
- */
-typedef enum holyc_parse_type(*holyc_parse_mode_func_t)(char, uint64_t, char *, void *, void **);
-
-/* 
  * For analysing the stream it each char is analysed for special chars or whitespace / newlines.
  * The right pinsor always advances until no more chars.
  * When a special char is found the substr of the buffer is retrieved using offsets calculated by the pinsor.
@@ -52,21 +39,6 @@ struct holyc_token {
 
 /* Turns the streams into tokens, populates the structures */
 int8_t holyc_parse_stream(char *, uint32_t, struct holyc_token **, uint32_t *);
-/* 
- * Default mode used when string, comment or char mode are inactive.
- * Reports all special characters and grammer within the language.
- * Will recognise when to change modes and how to handle the new tokens.
- */
-enum holyc_parse_type holyc_parse_mode_default(char, uint64_t, char *, void *, void **);
-/* 
- * String mode, activated when a new '"' is found in the buffer.
- * Rules:
- *      whitespace is ignored and not cared for,
- *      special chars (operators, colons and grammer) are ignored,
- */
-enum holyc_parse_type holyc_parse_mode_string(char, uint64_t, char *, void *, void **);
-enum holyc_parse_type holyc_parse_mode_comment(char, uint64_t, char *, void *, void **);
-
 
 
 #endif
