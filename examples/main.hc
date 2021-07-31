@@ -1,2 +1,2 @@
-			U32				main() {}
-		main;
+	      U32				main() {}
+main;

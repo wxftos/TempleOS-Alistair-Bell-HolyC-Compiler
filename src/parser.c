@@ -14,7 +14,7 @@ holyc_parse_stream(char *chars, uint32_t char_count, struct holyc_token **tokens
 	char *chars_copy = chars;
 	
     /* Stores the current character and the previous one. */
-	char current, previous;
+	char current, previous = ' ';
 
     /* Pinsor used to claw around tokens and extract them. */
 	struct holyc_parse_pinsor p = { 0};
