@@ -17,6 +17,7 @@
 
 #include "parser.h"
 
+/* Data passed throught the functions responsible for adding new tokens and formatting them. */
 struct holyc_parse_update_data {
 	struct holyc_token **tokens;
 	uint32_t *token_count;
@@ -24,7 +25,18 @@ struct holyc_parse_update_data {
 	char **construction;
 };
 
-typedef void (*holyc_parse_function)(const char, const char, struct holyc_parse_pinsor *, char *, void *, void **, struct holyc_parse_update_data *);
+/* 
+ * Function that is called for each new char.
+ * The running function can switch the next call based on the current char.
+ * Paramas:
+ *		all the chars,
+ *      current char,
+ *      last char type,
+ *      pointer to source pinsor,
+ *      pointer to function,
+ *      pointer to add token data,
+ */
+typedef void (*holyc_parse_function)(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void **, struct holyc_parse_update_data *);
 
 static void
 holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct holyc_parse_update_data *data)
@@ -41,6 +53,7 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 		data->alloc_count += 20;
 	}
 
+	fprintf(stdout, "holyc: new token -> %s\n", *data->construction);
 
 	struct holyc_token tmp_token = {
 		.hash = holyc_hash_chars(*data->construction),
@@ -49,33 +62,35 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 
 	struct holyc_token *insertion = &((*data->tokens)[(*data->token_count)]);
 
-	fprintf(stdout, "holyc: token index %d, allocation amount %d\n", *data->token_count, data->alloc_count);
-	
 	++(*data->token_count);
 	memcpy(insertion, &tmp_token, sizeof(tmp_token));
 }
 
 static void
-holyc_parse_type_default(const char current, const char previous, struct holyc_parse_pinsor *pinsor, char *chars, void *baton, void **func, struct holyc_parse_update_data *d)
+holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void **next_call, struct holyc_parse_update_data *data)
 {
-	switch (current) {
+	switch (current_char) {
 		/* Essentially whitespace junk, probaly really stupid code. */
 		case '\t'... ' ': {
 
 			/* Add a token if next is not a whitespace char. */
-			if (previous > ' ') {
+			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
 				/* Now add the token */
-				holyc_parse_add_token(chars, pinsor, d);
+				holyc_parse_add_token(chars, pinsor, data);
 			}
 			/* Equalise the claws and incriment the left claw. */
 			pinsor->left = pinsor->right;
 			pinsor->left++;
+
+			/* Update the last type. */
+			*last_type = HOLYC_PARSE_TYPE_WHITESPACE;
 			break;
 		}
 		
 		/* 
 		 * Ascii table has special grammer chars all spread out so a few fallthrough switches are needed.
-		 * this language won't support unicode, only ascii and extended.
+		 * This language won't support unicode, only ascii and extended.
+		 * All characters are treated as 1 byte wide.
 		 */
 		
 		case '!' ... '/': {
@@ -90,11 +105,19 @@ holyc_parse_type_default(const char current, const char previous, struct holyc_p
 		}
 		
 		case '{' ... '~': {
-			/* Firstly add the previous token. */
+			/* Firstly add the previous token if it was 'junk'. */
+			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE)
+				holyc_parse_add_token(chars, pinsor, data);
+
+
+			/* Update the last type. */
+			*last_type = HOLYC_PARSE_TYPE_SPECIAL;
 			break;
 		}
 		default: {
-			return;
+			/* Fails special cases then return as junk. */
+			*last_type = HOLYC_PARSE_TYPE_JUNK;
+			break;
 		}
 		
 	}
@@ -112,8 +135,8 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 
 	/* Always have a non incrimented buffer. */
 	char *chars_copy = chars;
-	/* Stores the previous and current character being inspected. */
-	char current_char, previous_char = '#';
+	/* Stores the current character being inspected. */
+	char current_char;
 
 	/* 
 	 * Prepare the memory. 
@@ -121,8 +144,8 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	 */
 	*tokens = (struct holyc_token *)calloc((char_count / 4) + 5, sizeof(*(*tokens)));
 
-	/* Baton data that gives extra unique data. */
-	void *baton = malloc(sizeof(*baton));
+	/* Last type of char that was inspected. */
+	enum holyc_parse_type last_type = HOLYC_PARSE_TYPE_JUNK;
 
 	/* Buffer to parse to the hasher where a token is stored. */
 	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
@@ -142,10 +165,9 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	/* Loop througth the chars. */
 	while ((current_char = *(chars_copy++))) {
 		
-		callback(current_char, previous_char, &p, chars, baton, (void **)&callback, &data);
+		callback(chars, current_char, &last_type, &p, (void **)&callback, &data);
 
 		p.right++;	
-		previous_char = current_char;
 	}
 
 	free(under_construction);
