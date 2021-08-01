@@ -116,6 +116,12 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 			break;
 		}
 		default: {
+			
+			if (*last_type == HOLYC_PARSE_TYPE_SPECIAL) {
+				holyc_parse_add_token(chars, pinsor, data);
+				pinsor->left = pinsor->right;
+			}
+
 			/* Fails special cases then return as junk. */
 			*last_type = HOLYC_PARSE_TYPE_JUNK;
 			break;
