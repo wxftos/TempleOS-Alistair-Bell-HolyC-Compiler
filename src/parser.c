@@ -48,9 +48,9 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 
 	/* Check for another batch token increase. */
 	if (data->alloc_count <= *data->token_count + 1) {
-		fprintf(stdout, "holyc: new token batch reallocation, count %d\n", data->alloc_count);
-		*data->tokens = (struct holyc_token *)realloc(*data->tokens, sizeof(struct holyc_token) * (data->alloc_count + 20));
 		data->alloc_count += 20;
+		fprintf(stdout, "holyc: new token batch reallocation, new count %d\n", data->alloc_count);
+		*data->tokens = (struct holyc_token *)realloc(*data->tokens, sizeof(struct holyc_token) * data->alloc_count);
 	}
 
 	fprintf(stdout, "holyc: new token -> %s\n", *data->construction);
@@ -105,12 +105,13 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 		}
 		
 		case '{' ... '~': {
-			/* Firstly add the previous token if it was 'junk'. */
-			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE)
+			/* Firstly add the previous token if it was 'junk', prevents 2 consequtive specials being added too many times. */
+			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
 				holyc_parse_add_token(chars, pinsor, data);
+			}
+			
+		    pinsor->left = pinsor->right;
 
-
-			/* Update the last type. */
 			*last_type = HOLYC_PARSE_TYPE_SPECIAL;
 			break;
 		}
@@ -145,7 +146,7 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	*tokens = (struct holyc_token *)calloc((char_count / 4) + 5, sizeof(*(*tokens)));
 
 	/* Last type of char that was inspected. */
-	enum holyc_parse_type last_type = HOLYC_PARSE_TYPE_JUNK;
+	enum holyc_parse_type last_type = HOLYC_PARSE_TYPE_WHITESPACE;
 
 	/* Buffer to parse to the hasher where a token is stored. */
 	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
@@ -164,9 +165,7 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 
 	/* Loop througth the chars. */
 	while ((current_char = *(chars_copy++))) {
-		
 		callback(chars, current_char, &last_type, &p, (void **)&callback, &data);
-
 		p.right++;	
 	}
 

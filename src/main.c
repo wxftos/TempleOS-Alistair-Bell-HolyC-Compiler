@@ -91,7 +91,9 @@ main(int argc, const char **args)
 			fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
 			return 1;
 		}
+		free(tokens);
 	}
+	fprintf(stdout, "holyc: stage 2 retrieved %d tokens\n", token_count);
 
 	free(chars);
 	return 0;

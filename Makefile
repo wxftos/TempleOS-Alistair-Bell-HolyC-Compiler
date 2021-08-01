@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-CONFIG_CC_FLAGS = -Wextra -Wall -g -Wno-unused-parameter
+CONFIG_CC_FLAGS = -Wextra -Wall -g -Wno-unused-parameter -Werror
 HOLYC_SOURCES = src/main.c src/parser.c src/util.c
 HOLYC_OBJECTS = ${HOLYC_SOURCES:.c=.o}
 HOLYC_TARGET  = holyc-compiler
-HOLYC_VERSION = 0.0.8
+HOLYC_VERSION = 0.0.9
 
 INSTALL_DIR   = /usr/bin
 
