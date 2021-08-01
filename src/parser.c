@@ -45,30 +45,21 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 void
 holyc_parse_mode_characters(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *update_data)
 {
+
+	/* This is such a simple function for the characters mode that is it in fact really cool it works. */
+
 	/* Char that made the mode switch, " or '. */
 	char start_char = *((char *)baton);
 	if (current_char == start_char) {
 
-		pinsor->right++;
-		/* Add the big string or characters token. */
-		holyc_parse_add_token(chars, pinsor, update_data);
-		pinsor->left = pinsor->right;
-
-
 		/* Change back to the default function. */
 		*next_call = holyc_parse_type_default;
-
-		/* Blatant lie. */
-		*last_type = HOLYC_PARSE_TYPE_JUNK;
 	};
 }
 
 void
 holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *data)
 {
-	if (pinsor->left > pinsor->right)
-		return;
-
 	switch (current_char) {
 		case '\t' ... ' ': {
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
@@ -101,6 +92,13 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 
 		/* Default is for special chars, easier to use fallthroughs for regular chars as they are more bunched up. */
 		default: {
+
+		    /* Set to the string mode. */
+			if (current_char == '\'' || current_char == '"') {
+				/* Characters mode uses the current char to determine the terminator. */
+				*((char *)baton) = current_char;
+				*next_call = holyc_parse_mode_characters;
+			}
 
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
 				holyc_parse_add_token(chars, pinsor, data);
