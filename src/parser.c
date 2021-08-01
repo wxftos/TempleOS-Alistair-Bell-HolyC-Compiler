@@ -17,27 +17,6 @@
 
 #include "parser.h"
 
-/* Data passed throught the functions responsible for adding new tokens and formatting them. */
-struct holyc_parse_update_data {
-	struct holyc_token **tokens;
-	uint32_t *token_count;
-	uint32_t alloc_count;
-	char **construction;
-};
-
-/* 
- * Function that is called for each new char.
- * The running function can switch the next call based on the current char.
- * Paramas:
- *		all the chars,
- *      current char,
- *      last char type,
- *      pointer to source pinsor,
- *      pointer to function,
- *      pointer to add token data,
- */
-typedef void (*holyc_parse_function)(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void **, struct holyc_parse_update_data *);
-
 static void
 holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct holyc_parse_update_data *data)
 {
@@ -49,87 +28,89 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 	/* Check for another batch token increase. */
 	if (data->alloc_count <= *data->token_count + 1) {
 		data->alloc_count += 20;
-		fprintf(stdout, "holyc: new token batch reallocation, new count %d\n", data->alloc_count);
 		*data->tokens = (struct holyc_token *)realloc(*data->tokens, sizeof(struct holyc_token) * data->alloc_count);
 	}
 
 	fprintf(stdout, "holyc: new token -> %s\n", *data->construction);
 
-	struct holyc_token tmp_token = {
+	struct holyc_token *insertion = &((*data->tokens)[(*data->token_count)]);
+
+	*insertion = (struct holyc_token) {
 		.hash = holyc_hash_chars(*data->construction),
 		.start_char_index = pinsor->right,
 	};
-
-	struct holyc_token *insertion = &((*data->tokens)[(*data->token_count)]);
-
 	++(*data->token_count);
-	memcpy(insertion, &tmp_token, sizeof(tmp_token));
 }
 
-static void
-holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void **next_call, struct holyc_parse_update_data *data)
+void
+holyc_parse_mode_characters(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *update_data)
 {
-	switch (current_char) {
-		/* Essentially whitespace junk, probaly really stupid code. */
-		case '\t'... ' ': {
+	/* Char that made the mode switch, " or '. */
+	char start_char = *((char *)baton);
+	if (current_char == start_char) {
 
-			/* Add a token if next is not a whitespace char. */
+		pinsor->right++;
+		/* Add the big string or characters token. */
+		holyc_parse_add_token(chars, pinsor, update_data);
+		pinsor->left = pinsor->right;
+
+
+		/* Change back to the default function. */
+		*next_call = holyc_parse_type_default;
+
+		/* Blatant lie. */
+		*last_type = HOLYC_PARSE_TYPE_JUNK;
+	};
+}
+
+void
+holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *data)
+{
+	if (pinsor->left > pinsor->right)
+		return;
+
+	switch (current_char) {
+		case '\t' ... ' ': {
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
-				/* Now add the token */
 				holyc_parse_add_token(chars, pinsor, data);
 			}
-			/* Equalise the claws and incriment the left claw. */
 			pinsor->left = pinsor->right;
 			pinsor->left++;
-
-			/* Update the last type. */
 			*last_type = HOLYC_PARSE_TYPE_WHITESPACE;
 			break;
 		}
-		
-		/* 
-		 * Ascii table has special grammer chars all spread out so a few fallthrough switches are needed.
-		 * This language won't support unicode, only ascii and extended.
-		 * All characters are treated as 1 byte wide.
-		 */
-		
-		case '!' ... '/': {
-			/* FALLTHROUGH */
-		}
-		case ':' ... '@': {
-			/* FALLTHROUGH */
-		}
 
-		case '[' ... '^': {
-			/* FALLTHROUGH */
-		}
-		
-		case '{' ... '~': {
-			/* Firstly add the previous token if it was 'junk', prevents 2 consequtive specials being added too many times. */
-			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
-				holyc_parse_add_token(chars, pinsor, data);
-			}
-			
-		    pinsor->left = pinsor->right;
+		/* Use fallthrough for regular characters. */
 
-			*last_type = HOLYC_PARSE_TYPE_SPECIAL;
-			break;
-		}
-		default: {
+		case '0' ... '9': 
+			/* FALLTHROUGH */
+		case 'A' ... 'Z':
+			/* FALLTHROUGH */
+		case 0x5f ... 'z': {
 			
+			/* If a regular char proceeds a special add it to the list of tokens. */
 			if (*last_type == HOLYC_PARSE_TYPE_SPECIAL) {
 				holyc_parse_add_token(chars, pinsor, data);
 				pinsor->left = pinsor->right;
 			}
 
-			/* Fails special cases then return as junk. */
+			/* Set the last type to junk. */
 			*last_type = HOLYC_PARSE_TYPE_JUNK;
 			break;
 		}
-		
+
+		/* Default is for special chars, easier to use fallthroughs for regular chars as they are more bunched up. */
+		default: {
+
+			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
+				holyc_parse_add_token(chars, pinsor, data);
+			}
+			pinsor->left = pinsor->right;
+
+			*last_type = HOLYC_PARSE_TYPE_SPECIAL;
+		}
 	}
 }
-
 
 int8_t 
 holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens, uint32_t *token_count)
@@ -156,6 +137,9 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 
 	/* Buffer to parse to the hasher where a token is stored. */
 	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
+
+	/* Extra data passed onto the next function call, call specific data. */
+	void *baton = malloc(sizeof(*baton));
 	
 	struct holyc_parse_update_data data = {
 		.tokens = tokens,
@@ -166,15 +150,19 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	
 	/* Fixes stupid bug. */
 	if ('\b' <  *chars && *chars < '!') {
-		p.left++;
+		++p.left;
 	}
 
 	/* Loop througth the chars. */
 	while ((current_char = *(chars_copy++))) {
-		callback(chars, current_char, &last_type, &p, (void **)&callback, &data);
-		p.right++;	
+		callback(chars, current_char, &last_type, &p, baton, (void **)&callback, &data);
+		++p.right;
 	}
 
+	/* Reallocate the size of the token storage to what it actually needs to be. */
+	*tokens = (struct holyc_token *)realloc(*tokens, *token_count * sizeof(*(*tokens)));
+
 	free(under_construction);
+	free(baton);
 	return 0;
 }

@@ -38,8 +38,36 @@ struct holyc_token {
 	uint64_t start_char_index;
 };
 
+/* Data passed throught the functions responsible for adding new tokens and formatting them. */
+struct holyc_parse_update_data {
+	struct holyc_token **tokens;
+	uint32_t *token_count;
+	uint32_t alloc_count;
+	char **construction;
+};
+
+/* 
+ * Function that is called for each new char.
+ * The running function can switch the next call based on the current char.
+ * Paramas:
+ *		all the chars,
+ *      current char,
+ *      last char type,
+ *      pointer to source pinsor,
+ *      pointer to function,
+ *      pointer to add token data,
+ */
+typedef void (*holyc_parse_function)(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+
+
 /* Turns the chars into tokens, populates the structures */
 int8_t holyc_parse_chars(char *, uint32_t, struct holyc_token **, uint32_t *);
 
+/* Default call for char parsing, can only enable specific modes and responsible for apropriate token handling. */
+void holyc_parse_type_default(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+/* Character and string share the same method, different extra stuff param. */
+void holyc_parse_type_characters(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+/* Single line and multiline share the same method, one is newline sensitive. */
+void holyc_parse_type_comment(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
 
 #endif
