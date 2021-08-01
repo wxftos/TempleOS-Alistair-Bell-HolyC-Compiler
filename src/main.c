@@ -13,7 +13,7 @@ holyc_handle_file(const char *file, const char *mode, char **char_buffer, uint32
 	}
 	/* Check that it actually has blocks. */
 	if (st.st_blocks <= 0) {
-		fprintf(stdout, "holyc: warning file %s lacks bytes, pointless to compile an empty file!\n", file);	
+		fprintf(stdout, "holyc: warning file %s lacks chars, pointless to compile an empty file!\n", file);	
 	}
 
 	/* Validate that it is not a directory. */
@@ -51,7 +51,7 @@ main(int argc, const char **args)
 	}
 
 	/* Read the source file.
-	 * Fetch the bytes that we can parse.
+	 * Fetch the chars that we can parse.
 	 */
 	const char *target = args[1];
 

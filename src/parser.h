@@ -2,6 +2,7 @@
 #define HOLYC_PARSER_H
 
 #include "inc.h"
+#include "util.h"
 
 enum holyc_parse_type {
 	/* Junk means non special to the parser, regular chars, used for starting tokens after specials. */
