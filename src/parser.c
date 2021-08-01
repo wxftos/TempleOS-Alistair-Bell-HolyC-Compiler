@@ -49,6 +49,8 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 
 	struct holyc_token *insertion = &((*data->tokens)[(*data->token_count)]);
 
+	fprintf(stdout, "holyc: token index %d, allocation amount %d\n", *data->token_count, data->alloc_count);
+	
 	++(*data->token_count);
 	memcpy(insertion, &tmp_token, sizeof(tmp_token));
 }
