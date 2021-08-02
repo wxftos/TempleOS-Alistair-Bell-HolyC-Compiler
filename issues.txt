@@ -1,0 +1,21 @@
+Program problems
+=============
+Logs the history and current defects within the program.
+Fixes document the commit number and an optional message if wanted.
+Each defect is separated into categories and are pretty self explanatory.
+Misc is for anything not really codebase related.
+
+Bugs
+====
+
+Build errors
+============
+* Fails on openbsd, makefile uses some gnu make specific features - standardise to all unix make's.
+Partial fix -> commit 1316b1dcc671753f0342cfb5cc008399f484bb75, compiles with gmake.
+
+Crashes
+=======
+
+
+Misc
+====
