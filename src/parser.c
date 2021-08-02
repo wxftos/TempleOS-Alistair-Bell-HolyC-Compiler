@@ -138,6 +138,9 @@ parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *
 
 	/* Extra data passed onto the next function call, call specific data. */
 	void *baton = malloc(sizeof(*baton));
+
+    /* Zero the token count. */
+    *token_count = 0;
 	
 	struct parser_update_data data = {
 		.tokens = tokens,
