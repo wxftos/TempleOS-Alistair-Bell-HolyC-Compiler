@@ -4,7 +4,7 @@
 #include "inc.h"
 #include "util.h"
 
-enum holyc_parse_type {
+enum parser_type {
 	/* Junk means non special to the parser, regular chars, used for starting tokens after specials. */
 	HOLYC_PARSE_TYPE_JUNK,
 	/* Includes spacees, newlines and tabs, also used for ending tokens. */
@@ -23,7 +23,7 @@ enum holyc_parse_type {
  * When a special char is found the substr of the buffer is retrieved using offsets calculated by the pinsor.
  * Then when the token is added the left is set to the right pinsor repeating until no more.
  */
-struct holyc_parse_pinsor {
+struct parser_pinsor {
 	uint64_t left;
 	uint64_t right;
 };
@@ -33,14 +33,14 @@ struct holyc_parse_pinsor {
  * A token is used for parsing and creating expressions to then convert into a series of instructions.
  * Each token stores the starting index of the character within the buffer, knowledge of the next or the char count can get the origional string.
  */
-struct holyc_token {
-	holyc_hash_t hash;
+struct token {
+	hash_t hash;
 	uint64_t start_char_index;
 };
 
 /* Data passed throught the functions responsible for adding new tokens and formatting them. */
-struct holyc_parse_update_data {
-	struct holyc_token **tokens;
+struct parser_update_data {
+	struct token **tokens;
 	uint32_t *token_count;
 	uint32_t alloc_count;
 	char **construction;
@@ -57,17 +57,17 @@ struct holyc_parse_update_data {
  *      pointer to function,
  *      pointer to add token data,
  */
-typedef void (*holyc_parse_function)(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+typedef void (*parser_function)(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 
 
 /* Turns the chars into tokens, populates the structures */
-int8_t holyc_parse_chars(char *, uint32_t, struct holyc_token **, uint32_t *);
+int8_t parser_chars(char *, uint32_t, struct token **, uint32_t *);
 
 /* Default call for char parsing, can only enable specific modes and responsible for apropriate token handling. */
-void holyc_parse_type_default(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+void parser_type_default(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 /* Character and string share the same method, different extra stuff param. */
-void holyc_parse_type_characters(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+void parser_type_characters(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 /* Single line and multiline share the same method, one is newline sensitive. */
-void holyc_parse_type_comment(char *, const char, enum holyc_parse_type *, struct holyc_parse_pinsor *, void *, void **, struct holyc_parse_update_data *);
+void parser_type_comment(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 
 #endif

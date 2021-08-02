@@ -18,7 +18,7 @@
 #include "parser.h"
 
 static void
-holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct holyc_parse_update_data *data)
+parser_add_token(char *chars, struct parser_pinsor *pinsor, struct parser_update_data *data)
 {
 	/* Clean the previous junk that the construction had. */
 	memset(*data->construction, 0, HOLYC_UNDER_CONSTRUCTION_SIZE);
@@ -28,22 +28,22 @@ holyc_parse_add_token(char *chars, struct holyc_parse_pinsor *pinsor, struct hol
 	/* Check for another batch token increase. */
 	if (data->alloc_count <= *data->token_count + 1) {
 		data->alloc_count += 20;
-		*data->tokens = (struct holyc_token *)realloc(*data->tokens, sizeof(struct holyc_token) * data->alloc_count);
+		*data->tokens = (struct token *)realloc(*data->tokens, sizeof(struct token) * data->alloc_count);
 	}
 
 	fprintf(stdout, "holyc: new token -> %s\n", *data->construction);
 
-	struct holyc_token *insertion = &((*data->tokens)[(*data->token_count)]);
+	struct token *insertion = &((*data->tokens)[(*data->token_count)]);
 
-	*insertion = (struct holyc_token) {
-		.hash = holyc_hash_chars(*data->construction),
+	*insertion = (struct token) {
+		.hash = hash_chars(*data->construction),
 		.start_char_index = pinsor->right,
 	};
 	++(*data->token_count);
 }
 
 void
-holyc_parse_mode_characters(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *update_data)
+parser_mode_characters(char *chars, const char current_char, enum parser_type *last_type, struct parser_pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
 {
 
 	/* This is such a simple function for the characters mode that is it in fact really cool it works. */
@@ -53,17 +53,17 @@ holyc_parse_mode_characters(char *chars, const char current_char, enum holyc_par
 	if (current_char == start_char) {
 
 		/* Change back to the default function. */
-		*next_call = holyc_parse_type_default;
+		*next_call = parser_type_default;
 	};
 }
 
 void
-holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_type *last_type, struct holyc_parse_pinsor *pinsor, void *baton, void **next_call, struct holyc_parse_update_data *data)
+parser_type_default(char *chars, const char current_char, enum parser_type *last_type, struct parser_pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *data)
 {
 	switch (current_char) {
 		case '\t' ... ' ': {
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
-				holyc_parse_add_token(chars, pinsor, data);
+				parser_add_token(chars, pinsor, data);
 			}
 			pinsor->left = pinsor->right;
 			pinsor->left++;
@@ -81,7 +81,7 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 			
 			/* If a regular char proceeds a special add it to the list of tokens. */
 			if (*last_type == HOLYC_PARSE_TYPE_SPECIAL) {
-				holyc_parse_add_token(chars, pinsor, data);
+				parser_add_token(chars, pinsor, data);
 				pinsor->left = pinsor->right;
 			}
 
@@ -97,11 +97,11 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 			if (current_char == '\'' || current_char == '"') {
 				/* Characters mode uses the current char to determine the terminator. */
 				*((char *)baton) = current_char;
-				*next_call = holyc_parse_mode_characters;
+				*next_call = parser_mode_characters;
 			}
 
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
-				holyc_parse_add_token(chars, pinsor, data);
+				parser_add_token(chars, pinsor, data);
 			}
 			pinsor->left = pinsor->right;
 
@@ -111,13 +111,13 @@ holyc_parse_type_default(char *chars, const char current_char, enum holyc_parse_
 }
 
 int8_t 
-holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens, uint32_t *token_count)
+parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *token_count)
 {
 	/* Pinsor used like a claw for grabbing tokens. */
-	struct holyc_parse_pinsor p = { 0 };
+	struct parser_pinsor p = { 0 };
 
 	/* Start in default mode. */
-	holyc_parse_function callback = holyc_parse_type_default;
+	parser_function callback = parser_type_default;
 
 	/* Always have a non incrimented buffer. */
 	char *chars_copy = chars;
@@ -128,10 +128,10 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	 * Prepare the memory. 
 	 * In this situation the program gueses by the char count to how many to tokens to pre allocate, saves constant reallocation.
 	 */
-	*tokens = (struct holyc_token *)calloc((char_count / 4) + 5, sizeof(*(*tokens)));
+	*tokens = (struct token *)calloc((char_count / 4) + 5, sizeof(*(*tokens)));
 
 	/* Last type of char that was inspected. */
-	enum holyc_parse_type last_type = HOLYC_PARSE_TYPE_WHITESPACE;
+	enum parser_type last_type = HOLYC_PARSE_TYPE_WHITESPACE;
 
 	/* Buffer to parse to the hasher where a token is stored. */
 	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
@@ -139,7 +139,7 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	/* Extra data passed onto the next function call, call specific data. */
 	void *baton = malloc(sizeof(*baton));
 	
-	struct holyc_parse_update_data data = {
+	struct parser_update_data data = {
 		.tokens = tokens,
 		.alloc_count = (char_count / 4) + 5,
 		.token_count = token_count,
@@ -158,7 +158,7 @@ holyc_parse_chars(char *chars, uint32_t char_count, struct holyc_token **tokens,
 	}
 
 	/* Reallocate the size of the token storage to what it actually needs to be. */
-	*tokens = (struct holyc_token *)realloc(*tokens, *token_count * sizeof(*(*tokens)));
+	*tokens = (struct token *)realloc(*tokens, *token_count * sizeof(*(*tokens)));
 
 	free(under_construction);
 	free(baton);

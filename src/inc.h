@@ -40,7 +40,7 @@
 
 
 /* The hash type of the strings, easy upgradability. */
-typedef uint64_t holyc_hash_t;
+typedef uint64_t hash_t;
 
 /* Max value for the hash, needs to be updated on type change. */
 #define HOLYC_HASH_T_MAX UINT32_MAX

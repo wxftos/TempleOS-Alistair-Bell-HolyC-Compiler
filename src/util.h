@@ -21,6 +21,6 @@
 #include "inc.h"
 
 /* Hashes a character for better finding of tokens. */
-holyc_hash_t holyc_hash_chars(char *);
+hash_t hash_chars(char *);
 
 #endif
