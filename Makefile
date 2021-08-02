@@ -19,9 +19,7 @@ HOLYC_SOURCES = src/main.c src/parser.c src/util.c
 HOLYC_OBJECTS = ${HOLYC_SOURCES:.c=.o}
 HOLYC_TARGET  = holyc-compiler
 HOLYC_VERSION = 0.0.10
-
 INSTALL_DIR   = /usr/bin
-
 
 all: ${HOLYC_TARGET}
 

@@ -139,20 +139,12 @@ parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *
 	/* Extra data passed onto the next function call, call specific data. */
 	void *baton = malloc(sizeof(*baton));
 
-    /* Zero the token count. */
-    *token_count = 0;
-	
 	struct parser_update_data data = {
 		.tokens = tokens,
 		.alloc_count = (char_count / 4) + 5,
 		.token_count = token_count,
 		.construction = &under_construction,
 	};
-	
-	/* Fixes stupid bug. */
-	if ('\b' <  *chars && *chars < '!') {
-		++p.left;
-	}
 
 	/* Loop througth the chars. */
 	while ((current_char = *(chars_copy++))) {
