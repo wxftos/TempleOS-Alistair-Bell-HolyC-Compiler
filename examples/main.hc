@@ -1,5 +1,5 @@
 static const U32	
-main()
+main(void)
 {
 	return 1;
 }

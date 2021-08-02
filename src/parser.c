@@ -51,7 +51,6 @@ parser_mode_characters(char *chars, const char current_char, enum parser_type *l
 	/* Char that made the mode switch, " or '. */
 	char start_char = *((char *)baton);
 	if (current_char == start_char) {
-
 		/* Change back to the default function. */
 		*next_call = parser_type_default;
 	};
@@ -90,15 +89,17 @@ parser_type_default(char *chars, const char current_char, enum parser_type *last
 			break;
 		}
 
+        case '"': {
+            /* FALLTHROUGH */
+        }
+        case '\'': {
+            *((char *)baton) = current_char; 
+            *next_call = parser_mode_characters;
+            /* FALLTHROUGH */
+        }
+
 		/* Default is for special chars, easier to use fallthroughs for regular chars as they are more bunched up. */
 		default: {
-
-		    /* Set to the string mode. */
-			if (current_char == '\'' || current_char == '"') {
-				/* Characters mode uses the current char to determine the terminator. */
-				*((char *)baton) = current_char;
-				*next_call = parser_mode_characters;
-			}
 
 			if (*last_type != HOLYC_PARSE_TYPE_WHITESPACE) {
 				parser_add_token(chars, pinsor, data);
@@ -106,7 +107,7 @@ parser_type_default(char *chars, const char current_char, enum parser_type *last
 			pinsor->left = pinsor->right;
 
 			*last_type = HOLYC_PARSE_TYPE_SPECIAL;
-		}
+        }
 	}
 }
 
