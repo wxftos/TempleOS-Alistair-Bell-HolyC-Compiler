@@ -22,19 +22,19 @@
 void
 arguments_help(void)
 {
-	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-l license] [-c compile: file.hc]\n", ARGUMENTS_HELP_STRING);
+	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-l license] [-c compile: file.hc].\n", ARGUMENTS_HELP_STRING);
 }
 void
 arguments_version(void)
 {
 	struct utsname u;
 	uname(&u);
-	fprintf(stdout, "holyc: version %s, platform %s, arch %s\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
+	fprintf(stdout, "holyc: version %s, platform %s, arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
 }
 void
 arguments_license(void)
 {
-	fprintf(stdout, "holyc: license GPLv3, this program comes with ABSOLUTELY NO WARRANTY. This is free software, visit https://www.gnu.org/licenses/gpl-3.0.html for more info\n");
+	fprintf(stdout, "holyc: license GPLv3, this program comes with ABSOLUTELY NO WARRANTY. This is free software, visit https://www.gnu.org/licenses/gpl-3.0.html for more info.\n");
 }
 
 int8_t

@@ -105,7 +105,7 @@ main(int argc, const char **argv)
 		}
 		free(tokens);
 	}
-	fprintf(stdout, "holyc: stage 2 retrieved %d tokens\n", token_count);
+	fprintf(stdout, "holyc: stage 2 retrieved %d tokens.\n", token_count);
 
 	free(chars);
 	return 0;
