@@ -6,11 +6,11 @@
 
 enum parser_type {
 	/* Junk means non special to the parser, regular chars, used for starting tokens after specials. */
-	HOLYC_PARSE_TYPE_JUNK,
+	PARSE_TYPE_JUNK,
 	/* Includes spacees, newlines and tabs, also used for ending tokens. */
-	HOLYC_PARSE_TYPE_WHITESPACE,
+	PARSE_TYPE_WHITESPACE,
 	/* Special includes grammer of the language and will split up tokens if found within (depends on mode). */
-	HOLYC_PARSE_TYPE_SPECIAL,
+	PARSE_TYPE_SPECIAL,
 };
 
 /* Tempory chars buffer amount of char count. */
@@ -64,10 +64,10 @@ typedef void (*parser_function)(char *, const char, enum parser_type *, struct p
 int8_t parser_chars(char *, uint32_t, struct token **, uint32_t *);
 
 /* Default call for char parsing, can only enable specific modes and responsible for apropriate token handling. */
-void parser_type_default(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_default(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 /* Character and string share the same method, different extra stuff param. */
-void parser_type_characters(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_characters(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 /* Single line and multiline share the same method, one is newline sensitive. */
-void parser_type_comment(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_comment(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
 
 #endif
