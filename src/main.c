@@ -71,7 +71,11 @@ main(int argc, const char **argv)
 
 	struct arguments_data data = { 0 };
 	/* Misc flags return -1 for no continue. */
-	if (arguments_handle(argc, argv, &data) < 0) {
+	int result;
+	if ((result = arguments_handle(argc, argv, &data)) < 0) {
+		if (result == -2) {
+			arguments_help();
+		}
 		return 1;
 	}
 
