@@ -15,11 +15,19 @@
 
 include config.mk
 
-HOLYC_SOURCES = src/main.c src/parser.c src/util.c
-HOLYC_OBJECTS = ${HOLYC_SOURCES:.c=.o}
-HOLYC_TARGET  = holyc-compiler
-HOLYC_VERSION = 0.0.10
-INSTALL_DIR   = /usr/bin
+HOLYC_SOURCES       = src/main.c src/args.c src/parser.c src/util.c
+HOLYC_OBJECTS		= ${HOLYC_SOURCES:.c=.o}
+HOLYC_TARGET        = holyc-compiler
+INSTALL_DIR         = /usr/bin
+
+# Project Version
+HOLYC_VERSION_MAJOR = 0
+HOLYC_VERSION_MINOR = 0
+HOLYC_VERSION_PATCH = 11
+HOLYC_VERSION       = ${HOLYC_VERSION_MAJOR}.${HOLYC_VERSION_MINOR}.${HOLYC_VERSION_PATCH}
+
+# Append the version as a macro
+CONFIG_CC_FLAGS     = -DHOLYC_BUILD_VERSION='"${HOLYC_VERSION}"'
 
 all: ${HOLYC_TARGET}
 

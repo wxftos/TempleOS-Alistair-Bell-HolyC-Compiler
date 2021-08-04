@@ -17,8 +17,10 @@
 
 #include "inc.h"
 #include "util.h"
+#include "args.h"
 #include "parser.h"
 
+/* Opens the files, validates its present and not a dir, reads the chars into the buffer. */
 static int8_t 
 handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *char_count)
 {
@@ -59,18 +61,24 @@ handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *ch
 }
 
 int
-main(int argc, const char **args)
+main(int argc, const char **argv)
 {
 	/* Check that we actually got an argument. */
 	if (argc < 2) {
-		fprintf(stderr, "holyc: error no input files!\n");
+		arguments_help();	
+		return 1;
+	}
+
+	struct arguments_data data = { 0 };
+	/* Misc flags return -1 for no continue. */
+	if (arguments_handle(argc, argv, &data) < 0) {
 		return 1;
 	}
 
 	/* Read the source file.
 	 * Fetch the chars that we can parse.
 	 */
-	const char *target = args[1];
+	const char *target = data.compiling;
 
 	char *chars = NULL;
 	uint32_t char_count = 0;
