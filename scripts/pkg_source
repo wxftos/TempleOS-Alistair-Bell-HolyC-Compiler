@@ -11,16 +11,16 @@ src_out=holyc-sources.$src_ver.tar.xz
 
 make clean
 
-cd ../ 
+cd .. || echo "Failed backwards" ; exit 1
 
 # Clean old archives.
-rm -f $src_dir/*.tar.xz
+rm -f "$src_dir/*.tar.xz"
 # Create the new archive and move to the source directory
-tar -cf $src_out $src_dir
-mv $src_out $src_dir
+tar -cf "$src_out" "$src_dir"
+mv "$src_out" "$src_dir"
 
-cd $src_dir
+cd "$src_dir" || echo "Failed to cd back to $src_dir."
 
 # Generate a md5sum of all the targball
-md5sum $src_out > checksums.txt
+md5sum "$src_out" > checksums.txt
 
