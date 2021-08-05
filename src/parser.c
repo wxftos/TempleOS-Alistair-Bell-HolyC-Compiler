@@ -38,6 +38,7 @@ parser_add_token(char *chars, struct parser_pinsor *pinsor, struct parser_update
 	*insertion = (struct token) {
 		.hash = hash_chars(*data->construction),
 		.start_char_index = pinsor->right,
+        .length = pinsor->right - pinsor->left,
 	};
 	++(*data->token_count);
 }
@@ -100,7 +101,7 @@ parser_mode_default(char *chars, const char current_char, enum parser_type *last
 				parser_add_token(chars, pinsor, data);
 			}
 			pinsor->left = pinsor->right;
-			pinsor->left++;
+			++pinsor->left;
 			*last_type = PARSE_TYPE_WHITESPACE;
 			break;
 		}

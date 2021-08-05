@@ -15,35 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef HOLYC_INC_H
-#define HOLYC_INC_H
+#ifndef HOLYC_LEXER_H
+#define HOLYC_LEXER_H
 
-/*
- * File handles the includes for all the project and defines useful macros.
- * The build system really should precompile the header for decreased build times.
- * Header should only include very useful stuff else put it in another file.
- */
+#include "inc.h"
+#include "parser.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/utsname.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <errno.h>
-#include <unistd.h>
-
-#define ARRAY_LEN(arr)  \
-	sizeof(arr) / sizeof((arr)[0])
-
-
-/* The hash type of the strings, easy upgradability. */
-typedef uint64_t hash_t;
-
-/* Max value for the hash, needs to be updated on type change. */
-#define HASH_T_MAX UINT32_MAX
-
+/* Turns tokens into arch independant instructions for the binary generator. */
+int8_t lexer_loop(char *, struct token *, const uint32_t);
+/* Populates type hash table scope 0 with the standard types for the language. */
+void lexer_populate_langauge_type_hashes(struct hash_table *);
+/* Populates the keywords for the language, this is static and cannot be added to during compilation. */
+void lexer_populate_language_keyword_hashes(struct hash_table *);
 
 #endif

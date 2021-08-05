@@ -31,11 +31,12 @@ struct parser_pinsor {
 /* 
  * Token is a sudo representation of the string it derives from.
  * A token is used for parsing and creating expressions to then convert into a series of instructions.
- * Each token stores the starting index of the character within the buffer, knowledge of the next or the char count can get the origional string.
+ * Each token stores the starting index of the character within the buffer, along with the length of it which can be used to extract the string without decoding the hash.
  */
 struct token {
 	hash_t hash;
 	uint64_t start_char_index;
+    uint16_t length;
 };
 
 /* Data passed throught the functions responsible for adding new tokens and formatting them. */

@@ -15,9 +15,9 @@
 
 include config.mk
 
-HOLYC_SOURCES       = src/main.c src/args.c src/parser.c src/util.c
+HOLYC_SOURCES       = src/main.c src/args.c src/parser.c src/util.c src/lexer.c
 HOLYC_OBJECTS		= ${HOLYC_SOURCES:.c=.o}
-HOLYC_TARGET        = holyc-compiler
+HOLYC_TARGET        = holyc
 INSTALL_DIR         = /usr/bin
 
 # Project Version

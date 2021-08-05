@@ -19,6 +19,7 @@
 #include "util.h"
 #include "args.h"
 #include "parser.h"
+#include "lexer.h"
 
 /* Opens the files, validates its present and not a dir, reads the chars into the buffer. */
 static int8_t 
@@ -96,17 +97,25 @@ main(int argc, const char **argv)
      * Search the words for special chars and then create new tokens.
 	 */
 
-	struct token *tokens;
+	struct token *tokens = NULL;
 	uint32_t token_count = 0;
-	if (char_count > 0) {
-		if (parser_chars(chars, char_count, &tokens, &token_count) != 0) {
-			fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
-			return 1;
-		}
-		free(tokens);
+	if (parser_chars(chars, char_count, &tokens, &token_count) != 0) {
+		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
+        return 1;
 	}
-	fprintf(stdout, "holyc: stage 2 retrieved %d tokens.\n", token_count);
+    
+    /* Stage 3 turns tokens into arch independant instructions for the elf creator to write the target binary. */
+    if (lexer_loop(chars, tokens, token_count) < 0) {
+		fprintf(stderr, "holyc: error failed to compile %s, stage 3 failed.\n", target);
+        return 1;
+    }
 
-	free(chars);
+    /* Cleanup the allocated memory. */
+    if (tokens != NULL) {
+        free(tokens);
+    }
+    if (chars != NULL) {
+        free(chars);
+    }
 	return 0;
 }
