@@ -45,6 +45,7 @@ struct parser_update_data {
 	uint32_t *token_count;
 	uint32_t alloc_count;
 	char **construction;
+    uint32_t construction_size;
 };
 
 /* 

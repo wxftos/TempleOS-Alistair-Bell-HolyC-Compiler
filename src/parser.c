@@ -22,16 +22,22 @@ parser_add_token(char *chars, struct parser_pinsor *pinsor, struct parser_update
 {
 	/* Clean the previous junk that the construction had. */
 	memset(*data->construction, 0, HOLYC_UNDER_CONSTRUCTION_SIZE);
+    
+    /* Check token is no more than 64 chars. */
+    if (data->construction_size < pinsor->right - pinsor->left) {
+        data->construction_size = pinsor->right - pinsor->left;
+        *data->construction = (char *)realloc(*data->construction, sizeof(char) * data->construction_size);
+    }
+
 	/* Copy the data to the buffer. */
 	strncpy(*data->construction, chars + pinsor->left, pinsor->right - pinsor->left);
 
 	/* Check for another batch token increase. */
 	if (data->alloc_count <= *data->token_count + 1) {
+        fprintf(stdout, "holyc: parser token reallocation executed\n");
 		data->alloc_count += 20;
 		*data->tokens = (struct token *)realloc(*data->tokens, sizeof(struct token) * data->alloc_count);
 	}
-
-	fprintf(stdout, "holyc: new token -> %s\n", *data->construction);
 
 	struct token *insertion = &((*data->tokens)[(*data->token_count)]);
 
@@ -189,9 +195,10 @@ parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *
 
 	struct parser_update_data data = {
 		.tokens = tokens,
-		.alloc_count = (char_count / 4) + 5,
+		.alloc_count = (char_count / 5) + 5,
 		.token_count = token_count,
 		.construction = &under_construction,
+        .construction_size = HOLYC_UNDER_CONSTRUCTION_SIZE,
 	};
 
 	/* Loop througth the chars. */

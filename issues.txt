@@ -16,6 +16,7 @@ Partial fix -> commit 1316b1dcc671753f0342cfb5cc008399f484bb75, compiles with gm
 Crashes
 =======
 * Segfault on large files -> munmap_chunk(): invalid pointer. Possible issue with reallocation in src/parser.c: parser_add_token
+Fixed -> commit 5365d02524a41d551b9c9b9957f697eacc1a7f1e, check for buffer writes outside the 64 char limit.
 
 
 
