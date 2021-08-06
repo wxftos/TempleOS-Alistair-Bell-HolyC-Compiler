@@ -39,13 +39,13 @@ struct hash_table {
 hash_t hash_chars(char *);
 
 /* Creates a new hash table preallocating a batch of spots. */
-void hash_table_new(struct hash_table *, const uint8_t, const uint32_t);
+void hash_table_new(struct hash_table *, uint8_t, uint32_t);
 /* Inserts a single member to the hash table. */
-void hash_table_insert(struct hash_table *, const hash_t);
+void hash_table_insert(struct hash_table *, hash_t);
 /* Adds a batch of new members at once, useful for adding the base language types. */
-void hash_table_insert_batch(struct hash_table *, const hash_t *, const uint32_t);
+void hash_table_insert_batch(struct hash_table *, hash_t *, uint32_t);
 /* Finds a hash stored within the table. Returns UINT32_MAX on failure. */
-uint32_t hash_table_find(struct hash_table *, const hash_t);
+uint32_t hash_table_find(struct hash_table *, hash_t);
 /* Destroys a table freeing the memory that it has allocated. */
 void hash_table_destroy(struct hash_table *);
 

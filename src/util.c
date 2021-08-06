@@ -43,7 +43,7 @@ hash_table_resize(struct hash_table *table)
     exit(-1);
 }
 void 
-hash_table_new(struct hash_table *table, const uint8_t scope, const uint32_t static_override)
+hash_table_new(struct hash_table *table, uint8_t scope, uint32_t static_override)
 {
     /* Allows to determine an allocation count */
     register uint32_t cnt;
@@ -65,13 +65,13 @@ hash_table_new(struct hash_table *table, const uint8_t scope, const uint32_t sta
     memset(table->members, 0, cnt * sizeof(*table->members));
 }
 void
-hash_table_insert(struct hash_table *table, const hash_t hash)
+hash_table_insert(struct hash_table *table, hash_t hash)
 {
    if (table->elements == (table->allocation_count - 1)) {
    }
 }
 void
-hash_table_insert_batch(struct hash_table *table, const hash_t *hashes, const uint32_t count)
+hash_table_insert_batch(struct hash_table *table, hash_t *hashes, uint32_t count)
 {
     /* Check for dynamic reallocation process. */ 
     if (table->elements == (table->allocation_count - 1)) {
@@ -79,9 +79,11 @@ hash_table_insert_batch(struct hash_table *table, const hash_t *hashes, const ui
     }
     
     /* Loop through finding a home for the new hashes. */
-    uint32_t i, pos;
-    for (i = 0; i < count; ++i) {
-        pos = hashes[i] % table->allocation_count;
+    uint32_t pos;
+    hash_t *ptr = &hashes[0];
+    for (; ptr != &hashes[count - 1]; ++ptr) {
+        pos = *ptr % table->allocation_count;
+        table->members[pos] = *ptr;
         ++table->elements;
     }
 }

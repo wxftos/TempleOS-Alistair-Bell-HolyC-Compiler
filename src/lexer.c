@@ -18,32 +18,50 @@
 
 #include "lexer.h"
 
+static inline void
+lexer_understand_tokens(void)
+{
+
+}
+
 int8_t
 lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
 {
     if (token_count <= 0 || chars == NULL) {
         return 0;
     }
-
-    /* Create symbol hash tables of the tokens values. */
-    struct hash_table language_types;
-    lexer_populate_langauge_type_hashes(&language_types);
-    fprintf(stdout, "holyc: initialised lexer language types, %d present\n", language_types.elements);
-    hash_table_destroy(&language_types);
     
+    uint32_t defined_types_count = 1, defined_symbols_count = 1;
+    /* An array of the types defined within the program. */
+    struct hash_table *defined_types = calloc(1, sizeof(*defined_types));
+    /* Array of varaibles, functions and others within the program. */
+    struct hash_table *defined_symbols = calloc(1, sizeof(*defined_symbols));
 
-    struct token *current;
-    for (current = &(*tokens); current != tokens + (token_count - 1); ++current) {
-        /* Firstly understand the type of token we are dealing with. */       
+    /* Dereference then get adress which retrieves index 0. */
+    struct token *ptr = &(*tokens);
+    for (; ptr != tokens + token_count; ++ptr) {
     }
 
+
+    /* Destroy the symbol tables contents. */
+    uint32_t i;
+    for (i = 0; i < defined_types_count; ++i) {
+        hash_table_destroy(&defined_types[i]);
+    }
+    for (i = 0; i < defined_symbols_count; ++i) {
+        hash_table_destroy(&defined_symbols[i]);
+    }
+
+    /* Free the arrays that are heap allocated. */
+    free(defined_types);
+    free(defined_symbols);
     return 0;
 }
 void 
 lexer_populate_langauge_type_hashes(struct hash_table *table)
 {
     /* Pregenerated hashes for the types using the algorithm. */
-    const hash_t types[] = {
+    hash_t types[] = {
 		23444510,   /* I8 */
 		23445302,   /* U8 */
 		1547337252, /* I16 */
@@ -55,7 +73,7 @@ lexer_populate_langauge_type_hashes(struct hash_table *table)
 		23445294,   /* U0 */
     };
 
-    /* Create a new table with the scope of 0 with a set number of elements preallocated as this won't grow. */
+    /* Create a new table with the scope of 0. */
     hash_table_new(table, 0, 9);
 
     /* Batch add the types. */

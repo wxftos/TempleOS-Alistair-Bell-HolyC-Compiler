@@ -35,7 +35,7 @@ struct parser_pinsor {
  */
 struct token {
 	hash_t hash;
-	uint64_t start_char_index;
+	uint64_t start;
     uint16_t length;
 };
 

@@ -29,7 +29,7 @@ arguments_version(void)
 {
 	struct utsname u;
 	uname(&u);
-	fprintf(stdout, "holyc: version %s, platform %s, arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
+	fprintf(stdout, "holyc: version %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
 }
 void
 arguments_license(void)
