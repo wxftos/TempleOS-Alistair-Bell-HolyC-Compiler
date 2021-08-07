@@ -8,6 +8,10 @@ Misc is for anything not really codebase related.
 Bugs
 ====
 
+Quirks
+======
+* `hash_chars` gives to different values on a single char reference than a const char ptr.
+
 Build errors
 ============
 * Fails on openbsd, makefile uses some gnu make specific features - standardise to all unix make's.

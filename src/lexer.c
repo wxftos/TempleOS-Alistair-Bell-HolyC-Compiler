@@ -18,11 +18,6 @@
 
 #include "lexer.h"
 
-static inline void
-lexer_understand_tokens(void)
-{
-
-}
 
 int8_t
 lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
@@ -41,9 +36,7 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
     struct token *ptr = &(*tokens);
     for (; ptr != tokens + token_count; ++ptr) {
     }
-
-
-    /* Destroy the symbol tables contents. */
+   
     uint32_t i;
     for (i = 0; i < defined_types_count; ++i) {
         hash_table_destroy(&defined_types[i]);
