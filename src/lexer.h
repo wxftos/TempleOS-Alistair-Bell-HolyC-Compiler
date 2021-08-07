@@ -24,7 +24,7 @@
 /* Turns tokens into arch independant instructions for the binary generator. */
 int8_t lexer_loop(char *, struct token *, const uint32_t);
 /* Populates type hash table scope 0 with the standard types for the language. */
-void lexer_populate_langauge_type_hashes(struct hash_table *);
+void lexer_populate_language_type_hashes(struct hash_table *);
 /* Populates the keywords for the language, this is static and cannot be added to during compilation. */
 void lexer_populate_language_keyword_hashes(struct hash_table *);
 

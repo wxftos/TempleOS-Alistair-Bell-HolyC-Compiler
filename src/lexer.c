@@ -15,9 +15,50 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 #include "lexer.h"
 
+enum lexer_token_type {
+	LEXER_TOKEN_TYPE_FIRST,
+	LEXER_TOKEN_TYPE_TERMINATOR,
+	LEXER_TOKEN_TYPE_ASSIGNMENT,
+	LEXER_TOKEN_TYPE_OPERATOR,
+	LEXER_TOKEN_TYPE_TYPE,
+	LEXER_TOKEN_TYPE_SYMBOL,
+	LEXER_TOKEN_TYPE_SCOPE_MODIFIER,
+	LEXER_TOKEN_TYPE_BROKEN,
+};
+
+static inline enum lexer_token_type
+lexer_get_token_type(char *chars, const struct token *tk, uint32_t current_scope, struct hash_table *types, struct hash_table *symbols)
+{
+	if (tk->length == 1) {
+		/* Single length then check for a special type, operator, scope changer or terminator. */	
+		switch (tk->hash) {
+			/* + */
+			case 355189: {
+			}
+			/* - */
+			case 355191: {
+			}
+			/* * */
+			case 355188: {
+			}
+			/* / */
+			case 355193: {
+			}
+			/* = */
+			case 355207: {
+			}
+			default: {
+			}
+		}
+	}
+	/* If it is not an operator check within the symbol tables. */
+	if (hash_table_find(&(*types), tk->hash)) {
+		/* Set the last type to type. */
+		return LEXER_TOKEN_TYPE_TYPE;
+	}
+}
 
 int8_t
 lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
@@ -32,11 +73,17 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
     /* Array of varaibles, functions and others within the program. */
     struct hash_table *defined_symbols = calloc(1, sizeof(*defined_symbols));
 
+	/* Populate the scope 0 with system types. */
+	lexer_populate_language_type_hashes(&(*defined_types));
+
     /* Dereference then get adress which retrieves index 0. */
     struct token *ptr = &(*tokens);
     for (; ptr != tokens + token_count; ++ptr) {
+		lexer_get_token_type(chars, ptr, 0, defined_types, defined_symbols);
     }
    
+	/* Cleanup the hashtables. */
+
     uint32_t i;
     for (i = 0; i < defined_types_count; ++i) {
         hash_table_destroy(&defined_types[i]);
@@ -51,7 +98,7 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
     return 0;
 }
 void 
-lexer_populate_langauge_type_hashes(struct hash_table *table)
+lexer_populate_language_type_hashes(struct hash_table *table)
 {
     /* Pregenerated hashes for the types using the algorithm. */
     hash_t types[] = {
@@ -67,7 +114,7 @@ lexer_populate_langauge_type_hashes(struct hash_table *table)
     };
 
     /* Create a new table with the scope of 0. */
-    hash_table_new(table, 0, 9);
+    hash_table_new(table, 0);
 
     /* Batch add the types. */
     hash_table_insert_batch(table, types, ARRAY_LEN(types));

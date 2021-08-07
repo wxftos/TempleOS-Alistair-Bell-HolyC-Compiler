@@ -43,26 +43,16 @@ hash_table_resize(struct hash_table *table)
     exit(-1);
 }
 void 
-hash_table_new(struct hash_table *table, uint8_t scope, uint32_t static_override)
+hash_table_new(struct hash_table *table, uint8_t scope)
 {
-    /* Allows to determine an allocation count */
-    register uint32_t cnt;
-    if (static_override != 0) {
-        cnt = static_override;
-    }
-    else {
-        /* Uses the default amount. */
-        cnt = HASH_TABLE_STARTING_ALLOC;
-    }
-    
     *table = (struct hash_table) {
        .elements = 0,
-       .members = calloc(cnt, sizeof(*table->members)),
+       .members = calloc(HASH_TABLE_STARTING_ALLOC, sizeof(*table->members)),
        .scope = scope,
-       .allocation_count = cnt,
+       .allocation_count = HASH_TABLE_STARTING_ALLOC,
     };
     /* Zero out the members. */
-    memset(table->members, 0, cnt * sizeof(*table->members));
+    memset(table->members, 0, HASH_TABLE_STARTING_ALLOC* sizeof(*table->members));
 }
 void
 hash_table_insert(struct hash_table *table, hash_t hash)
@@ -82,10 +72,16 @@ hash_table_insert_batch(struct hash_table *table, hash_t *hashes, uint32_t count
     uint32_t pos;
     hash_t *ptr = &hashes[0];
     for (; ptr != &hashes[count - 1]; ++ptr) {
-        pos = *ptr % table->allocation_count;
+        pos = ((uint32_t) *ptr % table->allocation_count);
         table->members[pos] = *ptr;
         ++table->elements;
     }
+}
+uint32_t
+hash_table_find(struct hash_table *table, hash_t hash)
+{
+	uint32_t index = ((uint32_t) hash % table->allocation_count);
+	return (table->members[index] != 0);	
 }
 void 
 hash_table_destroy(struct hash_table *table)

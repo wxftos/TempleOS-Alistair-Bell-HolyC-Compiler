@@ -39,7 +39,7 @@ struct hash_table {
 hash_t hash_chars(char *);
 
 /* Creates a new hash table preallocating a batch of spots. */
-void hash_table_new(struct hash_table *, uint8_t, uint32_t);
+void hash_table_new(struct hash_table *, uint8_t);
 /* Inserts a single member to the hash table. */
 void hash_table_insert(struct hash_table *, hash_t);
 /* Adds a batch of new members at once, useful for adding the base language types. */
