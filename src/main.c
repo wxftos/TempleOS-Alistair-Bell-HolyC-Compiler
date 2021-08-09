@@ -61,6 +61,16 @@ handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *ch
 	fclose(f);
 	return 0; 
 }
+static void
+main_cleanup(char *chars, struct token *tokens)
+{
+	if (chars != NULL) {
+		free(chars);
+	}
+	if (tokens != NULL) {
+		free(tokens);
+	}
+}
 
 int
 main(int argc, const char **argv)
@@ -90,6 +100,7 @@ main(int argc, const char **argv)
 	uint32_t char_count = 0;
 	if (handle_file(target, "r", &chars , &char_count) != 0) {
 		fprintf(stderr, "holyc: error failed to compile %s, stage 1 failed.\n", target);
+		main_cleanup(chars, NULL);
 		return 1;
 	}
 
@@ -102,21 +113,18 @@ main(int argc, const char **argv)
 	uint32_t token_count = 0;
 	if (parser_chars(chars, char_count, &tokens, &token_count) != 0) {
 		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
+		main_cleanup(chars, tokens);
         return 1;
 	}
     
     /* Stage 3 turns tokens into arch independant instructions for the elf creator to write the target binary. */
     if (lexer_loop(chars, tokens, token_count) < 0) {
 		fprintf(stderr, "holyc: error failed to compile %s, stage 3 failed.\n", target);
+		main_cleanup(chars, tokens);
         return 1;
     }
 
     /* Cleanup the allocated memory. */
-    if (tokens != NULL) {
-        free(tokens);
-    }
-    if (chars != NULL) {
-        free(chars);
-    }
+	main_cleanup(chars, tokens);
 	return 0;
 }
