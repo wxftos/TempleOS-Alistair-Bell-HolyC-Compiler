@@ -18,7 +18,7 @@
 #include "parser.h"
 
 static void
-parser_add_token(char *chars, struct parser_pinsor *pinsor, struct parser_update_data *data)
+parser_add_token(char *chars, struct pinsor *pinsor, struct parser_update_data *data)
 {
 	/* Clean the previous junk that the construction had. */
 	memset(*data->construction, 0, HOLYC_UNDER_CONSTRUCTION_SIZE);
@@ -50,7 +50,7 @@ parser_add_token(char *chars, struct parser_pinsor *pinsor, struct parser_update
 }
 
 void
-parser_mode_characters(char *chars, const char current_char, enum parser_type *last_type, struct parser_pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
+parser_mode_characters(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
 {
 
 	/* This is such a simple function for the characters mode that is it in fact really cool it works. */
@@ -64,7 +64,7 @@ parser_mode_characters(char *chars, const char current_char, enum parser_type *l
 }
 
 void
-parser_mode_comment(char *chars, const char current_char, enum parser_type *last_type, struct parser_pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
+parser_mode_comment(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
 {
     /* The decider char tells whether it is a single line or an multiline comment likewise to this one right here. */
     char decider_char = *((char *)baton);
@@ -99,7 +99,7 @@ parser_mode_comment(char *chars, const char current_char, enum parser_type *last
 }
 
 void
-parser_mode_default(char *chars, const char current_char, enum parser_type *last_type, struct parser_pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *data)
+parser_mode_default(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *data)
 {
 	switch (current_char) {
 		case '\t' ... ' ': {
@@ -168,7 +168,7 @@ int8_t
 parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *token_count)
 {
 	/* Pinsor used like a claw for grabbing tokens. */
-	struct parser_pinsor p = { 0 };
+	struct pinsor p = { 0 };
 
 	/* Start in default mode. */
 	parser_function callback = parser_mode_default;

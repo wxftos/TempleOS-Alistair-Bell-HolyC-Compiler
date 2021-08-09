@@ -23,7 +23,7 @@ enum parser_type {
  * When a special char is found the substr of the buffer is retrieved using offsets calculated by the pinsor.
  * Then when the token is added the left is set to the right pinsor repeating until no more.
  */
-struct parser_pinsor {
+struct pinsor {
 	uint64_t left;
 	uint64_t right;
 };
@@ -59,17 +59,17 @@ struct parser_update_data {
  *      pointer to function,
  *      pointer to add token data,
  */
-typedef void (*parser_function)(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+typedef void (*parser_function)(char *, const char, enum parser_type *, struct pinsor *, void *, void **, struct parser_update_data *);
 
 
 /* Turns the chars into tokens, populates the structures */
 int8_t parser_chars(char *, uint32_t, struct token **, uint32_t *);
 
 /* Default call for char parsing, can only enable specific modes and responsible for apropriate token handling. */
-void parser_mode_default(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_default(char *, const char, enum parser_type *, struct pinsor *, void *, void **, struct parser_update_data *);
 /* Character and string share the same method, different extra stuff param. */
-void parser_mode_characters(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_characters(char *, const char, enum parser_type *, struct pinsor *, void *, void **, struct parser_update_data *);
 /* Single line and multiline share the same method, one is newline sensitive. */
-void parser_mode_comment(char *, const char, enum parser_type *, struct parser_pinsor *, void *, void **, struct parser_update_data *);
+void parser_mode_comment(char *, const char, enum parser_type *, struct pinsor *, void *, void **, struct parser_update_data *);
 
 #endif
