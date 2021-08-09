@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #define ARRAY_LEN(arr)  \
 	sizeof(arr) / sizeof((arr)[0])

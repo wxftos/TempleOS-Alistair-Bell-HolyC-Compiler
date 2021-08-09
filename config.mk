@@ -15,4 +15,4 @@
 
 
 # C Compiler flags for the sources
-CONFIG_CC_FLAGS = -Wextra -Wall -g -Wno-unused-parameter -Wno-implicit-fallthrough
+CONFIG_CC_FLAGS = -std=c89 -Wextra -Wall -g -Wno-unused-parameter -Wno-implicit-fallthrough
