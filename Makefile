@@ -15,7 +15,7 @@
 
 include config.mk
 
-SOURCES       = src/main.c src/args.c src/parser.c src/util.c src/lexer.c
+SOURCES       = src/main.c src/args.c src/parser.c src/util.c src/lexer.c src/expr.c
 OBJECTS		  = ${SOURCES:.c=.o}
 TARGET        = holyc
 INSTALL_DIR   = /usr/bin
