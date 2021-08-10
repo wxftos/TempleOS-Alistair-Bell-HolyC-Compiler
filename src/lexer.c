@@ -22,8 +22,7 @@ enum lexer_type {
 };
 
 struct lexer_scopes {
-	uint16_t data;
-
+	uint32_t data;
 	union {
 		struct {
 			uint16_t param;

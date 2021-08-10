@@ -1,26 +1,22 @@
 #!/bin/sh
 
-# Note this does not create a netbsd pkgsource pacakge!
+# Stores the working directory that the script was run from.
+cwd=$(pwd)
+src_dir=$(echo $cwd | sed 's/.*\///')
+ver=$(make version)
+# Output archive name.
+out=holyc.$ver.tar.gz
 
-# Gets the directory of the sources.
-src_dir=$(pwd  | sed 's/^.*\///')
-# Version to package the sources as, uses `make version`.
-src_ver=$(make version)
-# Targball name.
-src_out=holyc-sources.$src_ver.tar.xz
+# Will clean any objects or binaries present with `make clean`.
+ls holyc && make clean
+# Remove old archives of the project.
+ls *.tar.gz | xargs -I {} rm {}
 
-make clean
 
-cd .. || echo "Failed backwards" ; exit 1
+cd .. || (echo "script: error unable to go up a directory, check your rights!" ; exit 1)
 
-# Clean old archives.
-rm -f "$src_dir/*.tar.xz"
-# Create the new archive and move to the source directory
-tar -cf "$src_out" "$src_dir"
-mv "$src_out" "$src_dir"
+tar czf $out $src_dir 
+# Move the archive to the root of the project
+mv $out $cwd
 
-cd "$src_dir" || echo "Failed to cd back to $src_dir."
-
-# Generate a md5sum of all the targball
-md5sum "$src_out" > checksums.txt
-
+cd $cwd
