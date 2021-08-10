@@ -21,8 +21,39 @@ enum lexer_type {
 	LEXER_TYPE_TYPE,
 };
 
+struct lexer_scopes {
+	uint16_t data;
+
+	union {
+		struct {
+			uint16_t param;
+			uint16_t braces; 
+		};
+	};
+};
+
+static void
+lexer_throw_error(char *chars, struct token *offender, const char *msg) {
+
+	/* Store the string of the char before the chars get incrimented and broken up. */
+	char *err_buff = (char *)malloc(offender->length + 1);
+	memset(err_buff, 0, offender->length);
+
+	strncpy(err_buff, chars + offender->start, offender->length);
+	err_buff[offender->length] = '\0';
+
+	/* Get the line that the error is on, this is calculated on the fly to reduce memory that the tokens have to store. */	
+	uint32_t ln = 0; 
+	char c;
+	while ((c = *(chars++))) {
+		ln += (c == '\n');
+	}
+	fprintf(stderr, "holyc: error syntax violation. %s, offender \'%s\', line %d.\n", msg, err_buff, ln);
+	free(err_buff);
+}
+
 int8_t
-lexer_validate_expression(char *chars, const struct token *tokens, struct pinsor *p, struct expression *expr)
+lexer_validate_expression(char *chars, struct token *tokens, struct pinsor *p, struct expression *expr)
 {
 
 	/* 
@@ -33,11 +64,14 @@ lexer_validate_expression(char *chars, const struct token *tokens, struct pinsor
 		fprintf(stderr, "holyc: error single token expression forbidden!\n");
 		return -1;
 	}
-	fprintf(stderr, "holyc: expression range [%ld %ld], %ld.\n", p->left, p->right, p->right - p->left);
 
 	/* This loop does no syntax checking, it finds what type the tokens are and will go through all of them. The next stage checks for errors. */
-	uint32_t i = 0;
-	for (; i < (p->right - p->left); ++i) {
+	struct token *ptr = &(*(tokens + p->left));
+	fprintf(stdout, "holyc: new token type run\n");
+	for (; ptr != &tokens[p->right]; ++ptr) {
+		char tmp[64] = { 0 };
+		strncpy(tmp, chars + ptr->start, ptr->length);
+		fprintf(stdout, "%s\n", tmp);
 	}
 	return 1;
 }
@@ -49,37 +83,35 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
         return 0;
     }
     
-	struct token *current_token = &(*tokens);
 	/* Everybody's favourite returning struct, p the pinsor. */
 	struct pinsor p = { 0 };
-	struct expression e = { 0 };
+	struct lexer_scopes scope = { 0 };
 
-    for (; current_token != tokens + token_count; ++current_token) {
-
-		/* 
-		 * Loop through the tokens until an special hash is found which symbolises the end of an expression.
-         * This would include ; { 
-		 */
-		switch (current_token->hash) {
-			case 355205:
-				/* FALLTHROUGH */
-			case 355269: {
-				/* 
-			     * Once a expression terminator is found, using the previous tokens an expression is to be created.
-				 * The expression checks using rules that the order of types of tokens is correct.
-				 * It checks for any syntax errors, malformed chars etc.
-				 */
-				if (lexer_validate_expression(chars, tokens, &p, &e) < 0) {
+	struct token *tptr = &(*tokens);
+    for (; p.right < token_count; ++p.right) {
+		switch (tptr->hash) {
+			/* Semicolon. */
+			case 355205: {
+				fprintf(stdout, "holyc: token index %ld\n", tptr->start);
+				break;
+			}
+			/* Opening param. */
+			case 355186: {
+				++scope.param;
+				break;
+			}
+			case 355187: {
+				if (scope.param == 0) {
+					/* Too many scope dereferences, syntax error. */
+					lexer_throw_error(chars, tptr, "Too many scope dereferenes");
 					return -1;
 				}
-				p.left = p.right;
+				--scope.param;
 			}
-			default: {
-				/* Nothing todo on default. */
-			}
+			break;
 		}
-		/* Update the right claw. */
-		++p.right;
+
+		++tptr;
     }
 	return 0;
 }
