@@ -34,7 +34,6 @@ parser_add_token(char *chars, struct pinsor *pinsor, struct parser_update_data *
 
 	/* Check for another batch token increase. */
 	if (data->alloc_count <= *data->token_count + 1) {
-        fprintf(stdout, "holyc: parser token reallocation executed\n");
 		data->alloc_count += 20;
 		*data->tokens = (struct token *)realloc(*data->tokens, sizeof(struct token) * data->alloc_count);
 	}

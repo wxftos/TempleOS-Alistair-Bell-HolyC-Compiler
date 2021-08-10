@@ -27,7 +27,7 @@ struct lexer_scopes {
 	union {
 		struct {
 			uint16_t param;
-			uint16_t braces; 
+			uint16_t brace; 
 		};
 	};
 };
@@ -43,11 +43,11 @@ lexer_throw_error(char *chars, struct token *offender, const char *msg) {
 	err_buff[offender->length] = '\0';
 
 	/* Get the line that the error is on, this is calculated on the fly to reduce memory that the tokens have to store. */	
-	uint32_t ln = 0; 
-	char c;
-	while ((c = *(chars++))) {
-		ln += (c == '\n');
+	uint32_t ln = 1, i = 0; 
+	for (; i < offender->start; ++i) {
+		ln += (chars[i] == '\n');
 	}
+	
 	fprintf(stderr, "holyc: error syntax violation. %s, offender \'%s\', line %d.\n", msg, err_buff, ln);
 	free(err_buff);
 }
@@ -69,9 +69,6 @@ lexer_validate_expression(char *chars, struct token *tokens, struct pinsor *p, s
 	struct token *ptr = &(*(tokens + p->left));
 	fprintf(stdout, "holyc: new token type run\n");
 	for (; ptr != &tokens[p->right]; ++ptr) {
-		char tmp[64] = { 0 };
-		strncpy(tmp, chars + ptr->start, ptr->length);
-		fprintf(stdout, "%s\n", tmp);
 	}
 	return 1;
 }
@@ -92,7 +89,6 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
 		switch (tptr->hash) {
 			/* Semicolon. */
 			case 355205: {
-				fprintf(stdout, "holyc: token index %ld\n", tptr->start);
 				break;
 			}
 			/* Opening param. */
@@ -100,13 +96,29 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
 				++scope.param;
 				break;
 			}
+			/* Closing param. */
 			case 355187: {
 				if (scope.param == 0) {
 					/* Too many scope dereferences, syntax error. */
 					lexer_throw_error(chars, tptr, "Too many scope dereferenes");
 					return -1;
 				}
+				else if (scope.param == 1) {
+				}
 				--scope.param;
+				break;
+			}
+			case 355269: {
+				++scope.brace;
+				break;
+			}
+			case 355271: {
+				/* Too many scope dereferences, similiar to the closing param above. */
+				if (scope.brace == 0) {
+					lexer_throw_error(chars, tptr, "Too many scope dereferences");
+					return -1;
+				}
+				--scope.brace;
 			}
 			break;
 		}
