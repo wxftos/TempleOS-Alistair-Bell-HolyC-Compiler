@@ -5,7 +5,7 @@ cwd=$(pwd)
 src_dir=$(echo $cwd | sed 's/.*\///')
 ver=$(make version)
 # Output archive name.
-out=holyc.$ver.tar.gz
+out=holyc-$(git branch | awk '{print $2}').$ver.tar.gz
 
 # Will clean any objects or binaries present with `make clean`.
 ls holyc && make clean
