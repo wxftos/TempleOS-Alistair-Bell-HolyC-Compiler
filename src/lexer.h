@@ -20,8 +20,11 @@
 
 #include "inc.h"
 #include "parser.h"
-#include "expr.h"
+#include "hashtables/extern.h"
 
+struct expression {
+	void *null;
+};
 
 /* Turns tokens into arch independant instructions for the binary generator. */
 int8_t lexer_loop(char *, struct token *, const uint32_t);

@@ -7,7 +7,8 @@
  * (at your option) any later version.
 
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY
+ * without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
@@ -15,22 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "util.h"
+#include "extern.h"
 
-#define HASH_TABLE_STARTING_ALLOC 50
-#define HASH_TABLE_NEW_BATCH_FORMULAR(ac, mem) \
-    ac * ((ac / HASH_TABLE_STARTING_ALLOC) + 1) * sizeof(mem)
-
-hash_t
-hash_chars(char *chars)
+void
+bucket_sort(struct bucket *bucket)
 {
-
-	/* Running of the hash first initialsed for bitshifts to work on the subsequent passes. */
-	hash_t total = 5381;
-
-	char c;
-	while ((c = *chars++)) {
-		total += ((total << 6) + total) + c;
+	/* No need to sort if their is only a single bucket. */
+	if (bucket->resident_count == 1) {
+		return;
 	}
-	return total;
+}
+int64_t
+bucket_search(struct bucket *bucket, hash_t *target)
+{
+	return INT64_MAX;
 }

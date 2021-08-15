@@ -15,7 +15,7 @@
 
 include config.mk
 
-SOURCES       = $(wildcard src/*.c)
+SOURCES       = src/main.c src/parser.c src/util.c src/args.c src/lexer.c src/hashtables/algor.c src/hashtables/imp.c
 OBJECTS		  = ${SOURCES:.c=.o}
 TARGET        = holyc
 INSTALL_DIR   = /usr/bin
@@ -39,15 +39,15 @@ src/%.o: src/%.c
 # final linking & compiling
 ${TARGET}: ${OBJECTS}
 	@echo "cc      $@"
-	@$(CC) -o $@ $^
+	@$(CC) -static -o $@ $^
 
 clean:
 	@echo "rm      ${OBJECTS} ${TARGET}"
 	@rm ${OBJECTS} ${TARGET}
 	
 install:
-	@echo "cp      ${TARGET} -> ${INSTALL_DIR}"
-	@cp ${TARGET} ${INSTALL_DIR}/
+	@echo "install ${TARGET} -> ${INSTALL_DIR}"
+	@install -m 755 -s ${TARGET} ${INSTALL_DIR}/
 
 version:
 	@echo "${VERSION}"

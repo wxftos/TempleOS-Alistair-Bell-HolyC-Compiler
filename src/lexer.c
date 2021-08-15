@@ -143,7 +143,7 @@ lexer_populate_language_type_hashes(struct hash_table *table)
     };
 
     /* Create a new table with the scope of 0. */
-    hash_table_new(table, 0);
+    hash_table_create(table);
 
     /* Batch add the types. */
     hash_table_insert_batch(table, types, ARRAY_LEN(types));
