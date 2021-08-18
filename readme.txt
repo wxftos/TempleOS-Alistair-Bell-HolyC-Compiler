@@ -9,7 +9,7 @@ GNU/Linux
 `make && sudo/doas make install`
 
 OpenBSD
-`gmake && doas gmake install`
+`make && doas make install`
 
 Note: 
     All code is tested on a series of GNU/Linux or BSD distributions before commit's.

@@ -16,7 +16,7 @@
 include config.mk
 
 SOURCES       = src/main.c src/parser.c src/util.c src/args.c src/lexer.c src/hashtables/algor.c src/hashtables/imp.c
-OBJECTS		  = ${SOURCES:.c=.o}
+OBJECTS       = ${SOURCES:.c=.o}
 TARGET        = holyc
 INSTALL_DIR   = /usr/bin
 
@@ -48,7 +48,7 @@ clean:
 	
 install: all
 	mkdir -p ${INSTALL_DIR}/
-	cp -f ${TARGET} ${INSTALL_DIR}/
+	install -m755 ${TARGET} ${INSTALL_DIR}
 	chmod 755 ${INSTALL_DIR}/${TARGET}
 
 uninstall:
