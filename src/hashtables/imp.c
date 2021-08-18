@@ -83,12 +83,12 @@ hash_table_find(struct hash_table *table, hash_t *hash)
 		return home;
 	}
 	/* If then the find function returns < 0, the index was not found, else the unsigned 32bit integer is the index. */
-	int64_t index = bucket_search(bptr, hash);
+	int64_t index = binary_search(bptr->residents, *hash, 0, bptr->resident_count);
 	
-	if (0 < index) {
+	if (index != -1) {
 		home = (struct hash_table_home) {
 			.root_index = b_index,
-			.bucket_index = index,
+			.bucket_index = (uint32_t) index,
 		};
 	}
 	return home;

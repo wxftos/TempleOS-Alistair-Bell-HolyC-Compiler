@@ -18,6 +18,22 @@
 
 #include "extern.h"
 
+int64_t
+binary_search(hash_t *hashes, hash_t search, uint32_t min, uint32_t max)
+{
+	register uint32_t middle = (uint32_t) (max - min) / 2;
+	if (min <= max) {
+		if (hashes[middle] == search) {
+			return middle;
+		}
+		if (search < hashes[middle]) {
+			return binary_search(hashes, search, min, middle - 1);
+		}
+		return binary_search(hashes, search, middle + 1, max);
+	}
+	return -1;
+}
+
 void
 bucket_sort(struct bucket *bucket)
 {
@@ -25,9 +41,4 @@ bucket_sort(struct bucket *bucket)
 	if (bucket->resident_count == 1) {
 		return;
 	}
-}
-int64_t
-bucket_search(struct bucket *bucket, hash_t *target)
-{
-	return INT64_MAX;
 }
