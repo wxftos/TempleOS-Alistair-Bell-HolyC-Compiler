@@ -20,40 +20,42 @@ OBJECTS		  = ${SOURCES:.c=.o}
 TARGET        = holyc
 INSTALL_DIR   = /usr/bin
 
-# Project Version
+# Project Version.
 VERSION_MAJOR = 0
 VERSION_MINOR = 0
-VERSION_PATCH = 13
+VERSION_PATCH = 14
 VERSION       = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
 
-# Append the version as a macro
+# Append the version as a macro.
 CONFIG_CC_FLAGS     := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 
+# Sources.
+.c.o:
+	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
+
+# The 'all' rule.
 all: ${TARGET}
 
-# source objs
-src/%.o: src/%.c
-	@echo "cc      $<"
-	@$(CC) ${CONFIG_CC_FLAGS} -c $< -o $@ 
-
-# final linking & compiling
+# Final linking.
 ${TARGET}: ${OBJECTS}
-	@echo "cc      $@"
-	@$(CC) -static -o $@ $^
+	$(CC) -o $@ ${OBJECTS}
 
+# Handy rules. 
 clean:
-	@echo "rm      ${OBJECTS} ${TARGET}"
-	@rm ${OBJECTS} ${TARGET}
+	rm ${TARGET}
+	rm src/*.o
+	rm src/hashtables/*.o
 	
-install:
-	@echo "install ${TARGET} -> ${INSTALL_DIR}"
-	@install -m 755 -s ${TARGET} ${INSTALL_DIR}/
-
-version:
-	@echo "${VERSION}"
+install: all
+	mkdir -p ${INSTALL_DIR}/
+	cp -f ${TARGET} ${INSTALL_DIR}/
+	chmod 755 ${INSTALL_DIR}/${TARGET}
 
 uninstall:
-	@rm ${INSTALL_DIR}/${TARGET}
-	@echo "rm      ${INSTALL_DIR}/${TARGET}"
+	rm ${INSTALL_DIR}/${TARGET}
+
+version:
+	@echo ${VERSION}
+
 
 .PHONY: clean install uninstall version
