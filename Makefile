@@ -15,19 +15,19 @@
 
 include config.mk
 
-SOURCES       = src/main.c src/parser.c src/util.c src/args.c src/lexer.c src/hashtables/algor.c src/hashtables/imp.c
-OBJECTS       = ${SOURCES:.c=.o}
-TARGET        = holyc
-INSTALL_DIR   = /usr/bin
+SOURCES         = src/main.c src/parser.c src/util.c src/args.c src/lexer.c src/hashtables/algor.c src/hashtables/imp.c
+OBJECTS         = ${SOURCES:.c=.o}
+TARGET          = holyc
+INSTALL_DIR     = /usr/bin
 
 # Project Version.
-VERSION_MAJOR = 0
-VERSION_MINOR = 0
-VERSION_PATCH = 14
-VERSION       = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+VERSION_MAJOR   = 0
+VERSION_MINOR   = 0
+VERSION_PATCH   = 15
+VERSION         = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
 
 # Append the version as a macro.
-CONFIG_CC_FLAGS     := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
+CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 
 # Sources.
 .c.o:
@@ -49,7 +49,6 @@ clean:
 install: all
 	mkdir -p ${INSTALL_DIR}/
 	install -m755 ${TARGET} ${INSTALL_DIR}
-	chmod 755 ${INSTALL_DIR}/${TARGET}
 
 uninstall:
 	rm ${INSTALL_DIR}/${TARGET}

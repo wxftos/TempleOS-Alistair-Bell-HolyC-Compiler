@@ -54,9 +54,9 @@ struct hash_table_home {
 	};
 };
 
-/* Uses the amount of hashes to decide the apropriate algorithm that the sort uses, small numbers avoid large allocation based methods - merge or radix. */
+/* Sorts the hashes using an apropriate algorithm. */
 void bucket_sort(struct bucket *);
-/* A simple binary search algorithm, returns -1 on failure */
+/* A simple binary search algorithm, returns -1 on failure. */
 int64_t binary_search(hash_t *, hash_t, uint32_t, uint32_t);
 
 void hash_table_create(struct hash_table *);

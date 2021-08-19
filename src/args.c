@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <getopt.h>
+
 #include "args.h"
 
 #define ARGUMENTS_HELP_STRING "hvlc:"

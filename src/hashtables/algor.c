@@ -18,6 +18,15 @@
 
 #include "extern.h"
 
+
+#define VC(ptr) (*(int *)ptr)
+
+static int
+qsort_callback_func(const void *first, const void *second) 
+{
+	return (int)VC(first) - VC(second);
+}
+
 int64_t
 binary_search(hash_t *hashes, hash_t search, uint32_t min, uint32_t max)
 {
@@ -37,8 +46,24 @@ binary_search(hash_t *hashes, hash_t search, uint32_t min, uint32_t max)
 void
 bucket_sort(struct bucket *bucket)
 {
-	/* No need to sort if their is only a single bucket. */
-	if (bucket->resident_count == 1) {
-		return;
+	hash_t *br = bucket->residents;
+	switch (bucket->resident_count) {
+		case 1: {
+			/* For a single element then it is already sorted. */
+			break;
+		}
+		/* Simple comparison . */
+		case 2: {
+			/* Check if the second element is less than the first. */
+			if (*br > *(br + 1)) {
+				register hash_t temp = *br;
+				*br = *(br + 1);
+				*(br + 1) = temp;
+			}
+			break;
+		}
+		default: {
+			qsort(bucket->residents, bucket->resident_count, sizeof(*br), qsort_callback_func);
+		}
 	}
 }
