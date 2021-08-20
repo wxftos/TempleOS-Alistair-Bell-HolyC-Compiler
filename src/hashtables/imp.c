@@ -55,7 +55,7 @@ hash_table_insert(struct hash_table *table, hash_t *hash)
 		bptr->alloc_count = HASH_TABLE_START_SIZE;
 		return;
 	}
-	/* Check that the bucket does not require more members. This will never fire if the previous if clause was passed. */
+	/* Check that the bucket does not require more residents. This will never fire if the previous if clause was passed. */
 	if (bptr->resident_count == (bptr->alloc_count - 1)) {
 		bucket_realloc(bptr);
 	}
@@ -67,7 +67,6 @@ hash_table_insert(struct hash_table *table, hash_t *hash)
 void
 hash_table_insert_batch(struct hash_table *table, hash_t *hashes, uint32_t hash_count)
 {
-
 }
 
 struct hash_table_home
@@ -97,6 +96,14 @@ hash_table_find(struct hash_table *table, hash_t *hash)
 void
 hash_table_destroy(struct hash_table *table)
 {
+	/* Firstly free all the bucket residents. */
+	struct bucket *bptr = &(*table->buckets);
+	for (; bptr <= &table->buckets[table->bucket_count - 1]; ++bptr) {
+		if (bptr->residents != NULL) {
+			free(bptr->residents);
+		}
+	}
+	free(table->buckets);
 }
 
 

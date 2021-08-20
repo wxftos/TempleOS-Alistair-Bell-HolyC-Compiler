@@ -1,0 +1,12 @@
+#!/bin/bash
+# This script is free software - I don't care what happens with this, NO WARRANTY.
+
+comps=(gcc clang tcc)
+
+for x in ${comps[@]}; do
+	echo "Building using $x compiler"
+	make clean ; make CC=$x all || (echo "Failed to build using $x!" ; exit -1)
+	echo -e "\n"	
+done
+
+echo "Built holyc using all compilers succesfully!"

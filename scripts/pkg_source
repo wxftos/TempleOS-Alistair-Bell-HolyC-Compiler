@@ -1,4 +1,5 @@
 #!/bin/sh
+# This script is free software - I don't care what happens with this, NO WARRANTY.
 
 # Stores the working directory that the script was run from.
 cwd=$(pwd)
