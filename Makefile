@@ -34,7 +34,12 @@ CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
 
 # The 'all' rule.
-all: ${TARGET}
+all: prepare ${TARGET}
+
+# Prepares the submodules
+prepare:
+	ln -sf src/hashtables/config.mk config.mk
+	make -C src/hashtables/
 
 # Final linking.
 ${TARGET}: ${OBJECTS}
