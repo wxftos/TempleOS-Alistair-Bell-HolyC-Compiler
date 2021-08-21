@@ -38,19 +38,19 @@ all: libraries ${TARGET}
 
 # Prepares the submodules
 prepare:
-	ln -sf $(shell pwd)/config.mk src/hashtables/config.mk
+	ln -sf $(shell pwd)/config.mk src/hashtable/config.mk
 
 libraries: prepare
-	make -C src/hashtables all
+	make -C src/hashtable all
 
 # Final linking.
 ${TARGET}: ${OBJECTS} 
-	$(CC) -L src/hashtables -o $@ ${OBJECTS} -lhashtable
+	$(CC) -L src/hashtable -o $@ ${OBJECTS} -lhashtable
 
 # Handy rules. 
 clean:
 	rm src/*.o
-	make -C src/hashtables clean
+	make -C src/hashtable clean
 	rm ${TARGET}
 
 install: all
