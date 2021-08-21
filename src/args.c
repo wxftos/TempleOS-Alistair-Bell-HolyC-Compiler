@@ -42,6 +42,9 @@ arguments_license(void)
 int8_t
 arguments_handle(const int32_t argc, const char **argv, struct arguments_data *data)
 {
+	/* Disable error message, use custom instead. */
+	opterr = 0;
+
 	int opt;
 	while ((opt = getopt(argc, (char *const *)argv, ARGUMENTS_HELP_STRING)) != -1) {
 		switch ((char)opt) {
@@ -64,6 +67,7 @@ arguments_handle(const int32_t argc, const char **argv, struct arguments_data *d
 				return 1;
 			}
 			default: {
+				fprintf(stderr, "holyc: error unrecognised or invalid usage of -%c, run whith -h for a list of options.\n", (char)optopt);
 				break;
 			}
 		}
