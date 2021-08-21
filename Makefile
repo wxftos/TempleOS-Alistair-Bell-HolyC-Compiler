@@ -15,7 +15,7 @@
 
 include config.mk
 
-SOURCES         = src/main.c src/parser.c src/util.c src/args.c src/lexer.c src/hashtables/algor.c src/hashtables/imp.c
+SOURCES         = src/main.c src/parser.c src/util.c src/args.c src/lexer.c
 OBJECTS         = ${SOURCES:.c=.o}
 TARGET          = holyc
 INSTALL_DIR     = /usr/bin
@@ -34,23 +34,25 @@ CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
 
 # The 'all' rule.
-all: prepare ${TARGET}
+all: libraries ${TARGET}
 
 # Prepares the submodules
 prepare:
-	ln -sf src/hashtables/config.mk config.mk
-	make -C src/hashtables/
+	ln -sf $(shell pwd)/config.mk src/hashtables/config.mk
+
+libraries: prepare
+	make -C src/hashtables all
 
 # Final linking.
-${TARGET}: ${OBJECTS}
-	$(CC) -o $@ ${OBJECTS}
+${TARGET}: ${OBJECTS} 
+	$(CC) -L src/hashtables -o $@ ${OBJECTS} -lhashtable
 
 # Handy rules. 
 clean:
-	rm ${TARGET}
 	rm src/*.o
-	rm src/hashtables/*.o
-	
+	make -C src/hashtables clean
+	rm ${TARGET}
+
 install: all
 	mkdir -p ${INSTALL_DIR}/
 	install -m755 ${TARGET} ${INSTALL_DIR}

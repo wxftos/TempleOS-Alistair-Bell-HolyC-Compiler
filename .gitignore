@@ -2,3 +2,4 @@ holyc
 *.o
 *.tar*
 checksums.txt
+src/hashtables/config.mk

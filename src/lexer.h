@@ -20,7 +20,7 @@
 
 #include "inc.h"
 #include "parser.h"
-#include "hashtables/extern.h"
+#include "hashtables/src/extern.h"
 
 struct expression {
 	void *null;
