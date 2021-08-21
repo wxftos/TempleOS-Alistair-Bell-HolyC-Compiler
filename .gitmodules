@@ -1,3 +1,0 @@
-[submodule "src/hashtables"]
-	path = src/hashtables
-	url = https://git.alistairbell.xyz/libhashtable/
