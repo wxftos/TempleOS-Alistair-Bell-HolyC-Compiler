@@ -68,7 +68,7 @@ arguments_handle(const int32_t argc, const char **argv, struct arguments_data *d
 			}
 			default: {
 				fprintf(stderr, "holyc: error unrecognised or invalid usage of -%c, run whith -h for a list of options.\n", (char)optopt);
-				break;
+				return -1;
 			}
 		}
 	}

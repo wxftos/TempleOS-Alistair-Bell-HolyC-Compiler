@@ -54,6 +54,7 @@ clean:
 	rm ${TARGET}
 
 install: all
+	strip ${TARGET}
 	mkdir -p ${INSTALL_DIR}/
 	install -m755 ${TARGET} ${INSTALL_DIR}
 
