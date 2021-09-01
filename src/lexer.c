@@ -54,21 +54,6 @@ lexer_throw_error(char *chars, struct token *offender, const char *msg) {
 int8_t
 lexer_validate_expression(char *chars, struct token *tokens, struct pinsor *p, struct expression *expr)
 {
-
-	/* 
-     * Single length expressions are allowed in holyc but only if the single token is a call to a function which takes 0 required arguments.
-	 * Whilst C allows use of single line references it is forbidden for now as it is dead code that the programmer should iron out.
-	 */
-	if (p->right - p->left == 2) {
-		fprintf(stderr, "holyc: error single token expression forbidden!\n");
-		return -1;
-	}
-
-	/* This loop does no syntax checking, it finds what type the tokens are and will go through all of them. The next stage checks for errors. */
-	struct token *ptr = &(*(tokens + p->left));
-	fprintf(stdout, "holyc: new token type run\n");
-	for (; ptr != &tokens[p->right]; ++ptr) {
-	}
 	return 1;
 }
 
@@ -79,51 +64,17 @@ lexer_loop(char *chars, struct token *tokens, const uint32_t token_count)
         return 0;
     }
     
-	/* Everybody's favourite returning struct, p the pinsor. */
-	struct pinsor p = { 0 };
-	struct lexer_scopes scope = { 0 };
-
+	/* Populate the language types. */
+	struct hash_table l_types;
+	lexer_populate_language_type_hashes(&l_types);
+	
 	struct token *tptr = &(*tokens);
-    for (; p.right < token_count; ++p.right) {
-		switch (tptr->hash) {
-			/* Semicolon. */
-			case 355205: {
-				break;
-			}
-			/* Opening param. */
-			case 355186: {
-				++scope.param;
-				break;
-			}
-			/* Closing param. */
-			case 355187: {
-				if (scope.param == 0) {
-					/* Too many scope dereferences, syntax error. */
-					lexer_throw_error(chars, tptr, "Too many scope dereferenes");
-					return -1;
-				}
-				else if (scope.param == 1) {
-				}
-				--scope.param;
-				break;
-			}
-			case 355269: {
-				++scope.brace;
-				break;
-			}
-			case 355271: {
-				/* Too many scope dereferences, similiar to the closing param above. */
-				if (scope.brace == 0) {
-					lexer_throw_error(chars, tptr, "Too many scope dereferences");
-					return -1;
-				}
-				--scope.brace;
-			}
-			break;
-		}
+	for (; tptr < tokens + token_count; ++tptr) {
+ 	}
 
-		++tptr;
-    }
+
+	/* Cleanup the hashtables. */
+	hash_table_destroy(&l_types);
 	return 0;
 }
 void 

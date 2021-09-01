@@ -34,18 +34,18 @@ CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
 
 # The 'all' rule.
-all: libraries ${TARGET}
+all: prepare libraries ${TARGET}
 
 # Prepares the submodules
 prepare:
 	ln -sf $(shell pwd)/config.mk src/hashtable/config.mk
 
-libraries: prepare
+libraries: 
 	make -C src/hashtable all
 
 # Final linking.
 ${TARGET}: ${OBJECTS} 
-	$(CC) -L src/hashtable -o $@ ${OBJECTS} -lhashtable
+	$(CC) -static -L src/hashtable -o $@ ${OBJECTS} -lhashtable
 
 # Handy rules. 
 clean:
@@ -54,9 +54,8 @@ clean:
 	rm ${TARGET}
 
 install: all
-	strip ${TARGET}
 	mkdir -p ${INSTALL_DIR}/
-	install -m755 ${TARGET} ${INSTALL_DIR}
+	install -s -m755 ${TARGET} ${INSTALL_DIR}
 
 uninstall:
 	rm ${INSTALL_DIR}/${TARGET}
