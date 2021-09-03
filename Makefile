@@ -45,7 +45,7 @@ libraries:
 
 # Final linking.
 ${TARGET}: ${OBJECTS} 
-	$(CC) -static -L src/hashtable -o $@ ${OBJECTS} -lhashtable
+	$(CC) ${CONFIG_LD_FLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable
 
 # Handy rules. 
 clean:
