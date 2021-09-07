@@ -17,10 +17,6 @@
 
 #include "util.h"
 
-#define HASH_TABLE_STARTING_ALLOC 50
-#define HASH_TABLE_NEW_BATCH_FORMULAR(ac, mem) \
-    ac * ((ac / HASH_TABLE_STARTING_ALLOC) + 1) * sizeof(mem)
-
 hash_t
 hash_chars(char *chars)
 {
@@ -30,7 +26,7 @@ hash_chars(char *chars)
 
 	char c;
 	while ((c = *chars++)) {
-		total += ((total << 6) + total) + c;
+		total += ((total << 5) + total) + c;
 	}
 	return total;
 }

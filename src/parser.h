@@ -14,7 +14,7 @@ enum parser_type {
 };
 
 /* Tempory chars buffer amount of char count. */
-#define HOLYC_UNDER_CONSTRUCTION_SIZE 64 * sizeof(char)
+#define UNDER_CONSTRUCTION_SIZE 64 * sizeof(char)
 
 
 /* 

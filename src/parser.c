@@ -21,7 +21,7 @@ static void
 parser_add_token(char *chars, struct pinsor *pinsor, struct parser_update_data *data)
 {
 	/* Clean the previous junk that the construction had. */
-	memset(*data->construction, 0, HOLYC_UNDER_CONSTRUCTION_SIZE);
+	memset(*data->construction, 0, UNDER_CONSTRUCTION_SIZE);
     
     /* Check token is no more than 64 chars. */
     if (data->construction_size < pinsor->right - pinsor->left) {
@@ -187,7 +187,7 @@ parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *
 	enum parser_type last_type = PARSE_TYPE_WHITESPACE;
 
 	/* Buffer to parse to the hasher where a token is stored. */
-	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
+	char *under_construction = (char *)malloc(UNDER_CONSTRUCTION_SIZE);
 
 	/* Extra data passed onto the next function call, call specific data. */
 	void *baton = malloc(sizeof(*baton));
@@ -197,7 +197,7 @@ parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *
 		.alloc_count = (char_count / 5) + 5,
 		.token_count = token_count,
 		.construction = &under_construction,
-        .construction_size = HOLYC_UNDER_CONSTRUCTION_SIZE,
+        .construction_size = UNDER_CONSTRUCTION_SIZE,
 	};
 
 	/* Loop througth the chars. */
