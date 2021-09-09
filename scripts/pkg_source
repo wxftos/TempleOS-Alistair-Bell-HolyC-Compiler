@@ -6,18 +6,18 @@ cwd=$(pwd)
 src_dir=$(echo $cwd | sed 's/.*\///')
 ver=$(make version)
 # Output archive name.
-out=holyc.$ver.tar.gz
+out=holyc.$ver.tar
 
 # Will clean any objects or binaries present with `make clean`.
 ls holyc && make clean
 # Remove old archives of the project.
 ls *.tar.gz | xargs -I {} rm {}
 
-
 cd .. || (echo "script: error unable to go up a directory, check your rights!" ; exit 1)
 
 tar czf $out $src_dir 
+gzip $out
 # Move the archive to the root of the project
-mv $out $cwd
+mv $out.gz $cwd
 
 cd $cwd
