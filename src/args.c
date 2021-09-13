@@ -19,12 +19,12 @@
 
 #include "args.h"
 
-#define ARGUMENTS_HELP_STRING "hvlc:"
+#define ARGUMENTS_HELP_STRING "hvc:"
 
 void
 arguments_help(void)
 {
-	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-l license] [-c compile: file.hc].\n", ARGUMENTS_HELP_STRING);
+	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-c compile: file.hc].\n", ARGUMENTS_HELP_STRING);
 }
 void
 arguments_version(void)
@@ -33,12 +33,6 @@ arguments_version(void)
 	uname(&u);
 	fprintf(stdout, "holyc: version %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
 }
-void
-arguments_license(void)
-{
-	fprintf(stdout, "holyc: license GPLv3, this program comes with ABSOLUTELY NO WARRANTY. This is free software, visit https://www.gnu.org/licenses/gpl-3.0.html for more info.\n");
-}
-
 int8_t
 arguments_handle(const int32_t argc, const char **argv, struct arguments_data *data)
 {
@@ -58,16 +52,12 @@ arguments_handle(const int32_t argc, const char **argv, struct arguments_data *d
 				arguments_version();
 				return -1;
 			}
-			case 'l': {
-				arguments_license();
-				return -1;
-			}
 			case 'c': {
 				data->compiling = optarg; 
 				return 1;
 			}
 			default: {
-				fprintf(stderr, "holyc: error unrecognised or invalid usage of -%c, run whith -h for a list of options.\n", (char)optopt);
+				fprintf(stderr, "holyc: error unrecognised or invalid usage of flag -%c, run whith -h for a list of options.\n", (char)optopt);
 				return -1;
 			}
 		}
