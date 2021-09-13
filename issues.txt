@@ -17,6 +17,7 @@ Build errors
 ============
 * Fails on openbsd, makefile uses some gnu make specific features - standardise to all unix make's.
 Partial fix -> commit 42c61bce012a9bb5d410394aa0650a3ce337d5fc, compiles with gmake.
+Full fix -> commit 2bcc50d3c20e075d7b4194e2519098c0eee03224, makefile posix compliant.
 
 Crashes
 =======

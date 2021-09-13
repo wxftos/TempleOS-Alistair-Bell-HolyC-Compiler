@@ -15,45 +15,53 @@
 
 include config.mk
 
-SOURCES       = $(wildcard src/*.c)
-OBJECTS		  = ${SOURCES:.c=.o}
-TARGET        = holyc
-INSTALL_DIR   = /usr/bin
+SOURCES         = src/main.c src/parser.c src/util.c src/args.c
+OBJECTS         = ${SOURCES:.c=.o}
+TARGET          = holyc
+INSTALL_DIR     = /usr/bin
 
-# Project Version
-VERSION_MAJOR = 0
-VERSION_MINOR = 0
-VERSION_PATCH = 13
-VERSION       = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+# Project Version.
+VERSION_MAJOR   = 0
+VERSION_MINOR   = 0
+VERSION_PATCH   = 15
+VERSION         = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
 
-# Append the version as a macro
-CONFIG_CC_FLAGS     := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
+# Append the version as a macro.
+CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 
-all: ${TARGET}
+# Sources.
+.c.o:
+	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
 
-# source objs
-src/%.o: src/%.c
-	@echo "cc      $<"
-	@$(CC) ${CONFIG_CC_FLAGS} -c $< -o $@ 
+# The 'all' rule.
+all: prepare libraries ${TARGET}
 
-# final linking & compiling
-${TARGET}: ${OBJECTS}
-	@echo "cc      $@"
-	@$(CC) -o $@ $^
+# Prepares the submodules
+prepare:
+	ln -sf $(shell pwd)/config.mk src/hashtable/config.mk
 
+libraries: 
+	make -C src/hashtable all
+
+# Final linking.
+${TARGET}: ${OBJECTS} 
+	$(CC) ${CONFIG_LD_FLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${CONFIG_LD_LIBS}
+
+# Handy rules. 
 clean:
-	@echo "rm      ${OBJECTS} ${TARGET}"
-	@rm ${OBJECTS} ${TARGET}
-	
-install:
-	@echo "cp      ${TARGET} -> ${INSTALL_DIR}"
-	@cp ${TARGET} ${INSTALL_DIR}/
+	rm src/*.o
+	make -C src/hashtable clean
+	rm ${TARGET}
 
-version:
-	@echo "${VERSION}"
+install: all
+	mkdir -p ${INSTALL_DIR}/
+	install -s -m755 ${TARGET} ${INSTALL_DIR}
 
 uninstall:
-	@rm ${INSTALL_DIR}/${TARGET}
-	@echo "rm      ${INSTALL_DIR}/${TARGET}"
+	rm ${INSTALL_DIR}/${TARGET}
+
+version:
+	@echo ${VERSION}
+
 
 .PHONY: clean install uninstall version

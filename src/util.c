@@ -17,10 +17,6 @@
 
 #include "util.h"
 
-#define HASH_TABLE_STARTING_ALLOC 50
-#define HASH_TABLE_NEW_BATCH_FORMULAR(ac, mem) \
-    ac * ((ac / HASH_TABLE_STARTING_ALLOC) + 1) * sizeof(mem)
-
 hash_t
 hash_chars(char *chars)
 {
@@ -30,63 +26,7 @@ hash_chars(char *chars)
 
 	char c;
 	while ((c = *chars++)) {
-		total += ((total << 6) + total) + c;
+		total += ((total << 5) + total) + c;
 	}
 	return total;
 }
-
-static void
-hash_table_resize(struct hash_table *table)
-{
-    /* Reallocate the memory. */
-    table->members = realloc(table->members, HASH_TABLE_NEW_BATCH_FORMULAR(table->allocation_count, *table->members));
-    exit(-1);
-}
-void 
-hash_table_new(struct hash_table *table, uint8_t scope)
-{
-    *table = (struct hash_table) {
-       .elements = 0,
-       .members = calloc(HASH_TABLE_STARTING_ALLOC, sizeof(*table->members)),
-       .scope = scope,
-       .allocation_count = HASH_TABLE_STARTING_ALLOC,
-    };
-    /* Zero out the members. */
-    memset(table->members, 0, HASH_TABLE_STARTING_ALLOC* sizeof(*table->members));
-}
-void
-hash_table_insert(struct hash_table *table, hash_t hash)
-{
-   if (table->elements == (table->allocation_count - 1)) {
-   }
-}
-void
-hash_table_insert_batch(struct hash_table *table, hash_t *hashes, uint32_t count)
-{
-    /* Check for dynamic reallocation process. */ 
-    if (table->elements == (table->allocation_count - 1)) {
-        hash_table_resize(table);
-    }
-    
-    /* Loop through finding a home for the new hashes. */
-    uint32_t pos;
-    hash_t *ptr = &hashes[0];
-    for (; ptr != &hashes[count - 1]; ++ptr) {
-        pos = ((uint32_t) *ptr % table->allocation_count);
-        table->members[pos] = *ptr;
-        ++table->elements;
-    }
-}
-uint32_t
-hash_table_find(struct hash_table *table, hash_t hash)
-{
-	uint32_t index = ((uint32_t) hash % table->allocation_count);
-	return (table->members[index] != 0);	
-}
-void 
-hash_table_destroy(struct hash_table *table)
-{
-    free(table->members);
-}
-
-

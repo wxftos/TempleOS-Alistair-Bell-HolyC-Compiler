@@ -34,17 +34,8 @@
 #include <stdint.h>
 #include <errno.h>
 #include <unistd.h>
-#include <getopt.h>
 
 #define ARRAY_LEN(arr)  \
 	sizeof(arr) / sizeof((arr)[0])
-
-
-/* The hash type of the strings, easy upgradability. */
-typedef uint64_t hash_t;
-
-/* Max value for the hash, needs to be updated on type change. */
-#define HASH_T_MAX UINT32_MAX
-
 
 #endif

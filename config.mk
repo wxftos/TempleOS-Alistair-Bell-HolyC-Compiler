@@ -14,5 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-# C Compiler flags for the sources
+# C Compiler flags for the sources, by default debug and no optimisations are used.
 CONFIG_CC_FLAGS = -std=c89 -Wextra -Wall -g -Wno-unused-parameter -Wno-implicit-fallthrough
+# Final linking flags, -static for no shared libraries, static linking is helpful for cross compiling on different architectures.
+CONFIG_LD_FLAGS =
+# Specify any other libraries, -lmusl for musl based libc.
+CONFIG_LD_LIBS  =

@@ -12,73 +12,60 @@
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https:www.gnu.org/licenses/>.
 */
 
 #include "parser.h"
 
+#define BUFF_SIZE 128
+
+/* 
+ * Whilst static variables are not good practice it does solve the callback's params being flooded with other calls required params. 
+ * Only varaibles which make sense to be static are, along with any function defines for referencing.
+ */
+
+static char baton;
+static char *static_chars;
+static struct pinsor pinsor = { 0 };
+static void (*callback)(const char, const char, enum token_type *);
+
+static void parse_mode_chars(const char, const char, enum token_type *);
+static void parse_mode_comment(const char, const char, enum token_type *);
+static void parse_mode_default(const char, const char, enum token_type *);
+
 static void
-parser_add_token(char *chars, struct pinsor *pinsor, struct parser_update_data *data)
+parser_add_token(void)
 {
-	/* Clean the previous junk that the construction had. */
-	memset(*data->construction, 0, HOLYC_UNDER_CONSTRUCTION_SIZE);
-    
-    /* Check token is no more than 64 chars. */
-    if (data->construction_size < pinsor->right - pinsor->left) {
-        data->construction_size = pinsor->right - pinsor->left;
-        *data->construction = (char *)realloc(*data->construction, sizeof(char) * data->construction_size);
-    }
-
-	/* Copy the data to the buffer. */
-	strncpy(*data->construction, chars + pinsor->left, pinsor->right - pinsor->left);
-
-	/* Check for another batch token increase. */
-	if (data->alloc_count <= *data->token_count + 1) {
-		data->alloc_count += 20;
-		*data->tokens = (struct token *)realloc(*data->tokens, sizeof(struct token) * data->alloc_count);
-	}
-
-	struct token *insertion = &((*data->tokens)[(*data->token_count)]);
-
-	*insertion = (struct token) {
-		.hash = hash_chars(*data->construction),
-		.start = pinsor->left,
-        .length = pinsor->right - pinsor->left,
-	};
-	++(*data->token_count);
+	char tmp[64] = { 0 };
+	strncpy(tmp, static_chars + pinsor.left, pinsor.right - pinsor.left);
+	fprintf(stdout, "holyc: [%s]\n", tmp);
 }
 
 void
-parser_mode_characters(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
+parse_mode_chars(const char cchar, const char lchar, enum token_type *ltype)
 {
-
-	/* This is such a simple function for the characters mode that is it in fact really cool it works. */
-
 	/* Char that made the mode switch, " or '. */
-	char start_char = *((char *)baton);
-	if (current_char == start_char) {
+	if (cchar == baton) {
 		/* Change back to the default function. */
-		*next_call = parser_mode_default;
+		callback = parse_mode_default;
 	};
 }
 
 void
-parser_mode_comment(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *update_data)
+parse_mode_comment(const char cchar, const char lchar, enum token_type *ltype)
 {
-    /* The decider char tells whether it is a single line or an multiline comment likewise to this one right here. */
-    char decider_char = *((char *)baton);
-    switch (current_char) {
+    switch (cchar) {
         /* Handle the case for single line comments. */
         case '\n': {
             /* End of single line comment. */
-            if (decider_char == '/') {
+            if (baton == '/') {
                 goto end_it;
             }
             return;
         }
         case '/': {
             /* End of the multiline comment. */
-            if (chars[pinsor->right - 1] == '*') {
+            if (lchar == '*') {
                 /* Newline plus a single line comment. */
                 goto end_it;
             }
@@ -89,25 +76,25 @@ parser_mode_comment(char *chars, const char current_char, enum parser_type *last
         }
     }
     end_it: {
-        pinsor->left = pinsor->right;
-        ++pinsor->left;
+        pinsor.left = pinsor.right;
+        ++pinsor.left;
         /* Obvious lie :). */
-        *last_type = PARSE_TYPE_WHITESPACE;
-        *next_call = parser_mode_default;
+        *ltype = TOKEN_TYPE_NULL;
+        callback = parse_mode_default;
     }
 }
 
 void
-parser_mode_default(char *chars, const char current_char, enum parser_type *last_type, struct pinsor *pinsor, void *baton, void **next_call, struct parser_update_data *data)
+parse_mode_default(const char cchar, const char lchar, enum token_type *ltype)
 {
-	switch (current_char) {
+	switch (cchar) {
 		case '\t' ... ' ': {
-			if (*last_type != PARSE_TYPE_WHITESPACE) {
-				parser_add_token(chars, pinsor, data);
+			if (*ltype != TOKEN_TYPE_NULL) {
+				 parser_add_token();
 			}
-			pinsor->left = pinsor->right;
-			++pinsor->left;
-			*last_type = PARSE_TYPE_WHITESPACE;
+			pinsor.left = pinsor.right;
+			++pinsor.left;
+			*ltype = TOKEN_TYPE_NULL;
 			break;
 		}
 
@@ -118,24 +105,23 @@ parser_mode_default(char *chars, const char current_char, enum parser_type *last
 		case 'A' ... 'Z':
 			/* FALLTHROUGH */
 		case 0x5f ... 'z': {
-			
 			/* If a regular char proceeds a special add it to the list of tokens. */
-			if (*last_type == PARSE_TYPE_SPECIAL) {
-				parser_add_token(chars, pinsor, data);
-				pinsor->left = pinsor->right;
+			if (*ltype == TOKEN_TYPE_OPER) {
+				 parser_add_token();
+				pinsor.left = pinsor.right;
 			}
 
 			/* Set the last type to junk. */
-			*last_type = PARSE_TYPE_JUNK;
+			*ltype = TOKEN_TYPE_REG;
 			break;
 		}
         case '/': {
             /* FALLTHROUGH */
         }
         case '*': {
-            if (pinsor->right != 0 && chars[pinsor->right - 1] == '/') {
-                *((char *)baton) = current_char;
-                *next_call = parser_mode_comment;
+            if (pinsor.right != 0 && lchar == '/') {
+                baton = cchar;
+                callback = parse_mode_comment;
                 break;
             }
             goto special_default;
@@ -144,72 +130,47 @@ parser_mode_default(char *chars, const char current_char, enum parser_type *last
             /* FALLTHROUGH */
         }
         case '\'': {
-            *((char *)baton) = current_char; 
-            *next_call = parser_mode_characters;
+            baton = cchar; 
+            callback = parse_mode_chars;
             /* FALLTHROUGH */
         }
 
 		/* Default is for special chars, easier to use fallthroughs for regular chars as they are more bunched up. */
 		default: {
             special_default: {
-			    if (*last_type != PARSE_TYPE_WHITESPACE) {
-				    parser_add_token(chars, pinsor, data);
+			    if (*ltype != TOKEN_TYPE_NULL) {
+				    parser_add_token();
 			    }
-			    pinsor->left = pinsor->right;
-
-			    *last_type = PARSE_TYPE_SPECIAL;
+			    pinsor.left = pinsor.right;
+			    *ltype = TOKEN_TYPE_OPER;
             }
         }
 	}
 }
 
 int8_t 
-parser_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *token_count)
+parse_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *token_count)
 {
-	/* Pinsor used like a claw for grabbing tokens. */
-	struct pinsor p = { 0 };
-
-	/* Start in default mode. */
-	parser_function callback = parser_mode_default;
+	callback = parse_mode_default;
 
 	/* Always have a non incrimented buffer. */
-	char *chars_copy = chars;
+	static_chars = chars;
 	/* Stores the current character being inspected. */
-	char current_char;
+	char *cchar = &(*chars), lchar = ' ';
+	enum token_type ltype = TOKEN_TYPE_NULL;
 
-	/* 
-	 * Prepare the memory. 
-	 * In this situation the program gueses by the char count to how many to tokens to pre allocate, saves constant reallocation.
-	 */
-	*tokens = (struct token *)calloc((char_count / 4) + 5, sizeof(*(*tokens)));
-
-	/* Last type of char that was inspected. */
-	enum parser_type last_type = PARSE_TYPE_WHITESPACE;
-
-	/* Buffer to parse to the hasher where a token is stored. */
-	char *under_construction = (char *)malloc(HOLYC_UNDER_CONSTRUCTION_SIZE);
-
-	/* Extra data passed onto the next function call, call specific data. */
-	void *baton = malloc(sizeof(*baton));
-
-	struct parser_update_data data = {
-		.tokens = tokens,
-		.alloc_count = (char_count / 5) + 5,
-		.token_count = token_count,
-		.construction = &under_construction,
-        .construction_size = HOLYC_UNDER_CONSTRUCTION_SIZE,
-	};
+	*tokens = (struct token *)malloc((char_count / 5) + 5 * sizeof(struct token));
 
 	/* Loop througth the chars. */
-	while ((current_char = *(chars_copy++))) {
-		callback(chars, current_char, &last_type, &p, baton, (void **)&callback, &data);
-		++p.right;
-	}
+	do {
+		callback(*cchar, lchar, &ltype);
+		lchar = *cchar;
+		++pinsor.right;
+		++cchar;
+	} while (cchar < chars + char_count);
 
 	/* Reallocate the size of the token storage to what it actually needs to be. */
 	*tokens = (struct token *)realloc(*tokens, *token_count * sizeof(*(*tokens)));
 
-	free(under_construction);
-	free(baton);
 	return 0;
 }
