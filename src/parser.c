@@ -38,7 +38,6 @@ parser_add_token(void)
 {
 	char tmp[64] = { 0 };
 	strncpy(tmp, static_chars + pinsor.left, pinsor.right - pinsor.left);
-	//tmp[pinsor.right - pinsor.left] = '\0';
 	fprintf(stdout, "holyc: [%s]\n", tmp);
 }
 
