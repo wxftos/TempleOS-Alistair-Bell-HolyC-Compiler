@@ -104,6 +104,7 @@ main(int argc, const char **argv)
 		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
 	 }
 
+	free(tokens);
 	free(chars);
 	return 0;
 }
