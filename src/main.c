@@ -102,9 +102,12 @@ main(int argc, const char **argv)
 	 uint32_t token_count = 0;
 	 if (parse_chars(chars, char_count, &tokens, &token_count) < 0) {
 		fprintf(stderr, "holyc: error failed to compile %s, stage 2 failed.\n", target);
+		return 1;
 	 }
 
-	free(tokens);
+	if (token_count != 0) {
+		free(tokens);
+	}
 	free(chars);
 	return 0;
 }

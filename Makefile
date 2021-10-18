@@ -31,7 +31,8 @@ CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
 
 # Sources.
 .c.o:
-	$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
+	@echo "cc $@"
+	@$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
 
 # The 'all' rule.
 all: prepare libraries ${TARGET}
@@ -45,7 +46,8 @@ libraries:
 
 # Final linking.
 ${TARGET}: ${OBJECTS} 
-	$(CC) ${CONFIG_LD_FLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${CONFIG_LD_LIBS}
+	@echo "cc ${TARGET}"
+	@$(CC) ${CONFIG_LD_FLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${CONFIG_LD_LIBS}
 
 # Handy rules. 
 clean:

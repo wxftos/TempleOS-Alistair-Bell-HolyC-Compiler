@@ -20,11 +20,12 @@
 #include "args.h"
 
 #define ARGUMENTS_HELP_STRING "hvc:"
+#define ARGUMENTS_HELP_PRETTY "hvc"
 
 void
 arguments_help(void)
 {
-	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-c compile: file.hc].\n", ARGUMENTS_HELP_STRING);
+	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-c source_file].\n", ARGUMENTS_HELP_PRETTY);
 }
 void
 arguments_version(void)
