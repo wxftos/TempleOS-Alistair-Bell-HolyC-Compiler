@@ -36,7 +36,7 @@ static void parse_mode_default(const char, const char, enum token_type *);
 static void
 parser_add_token(void)
 {
-	char tmp[64] = { 0 };
+	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, static_chars + pinsor.left, pinsor.right - pinsor.left);
 	fprintf(stdout, "holyc: [%s]\n", tmp);
 }
@@ -151,8 +151,12 @@ parse_mode_default(const char cchar, const char lchar, enum token_type *ltype)
 int8_t 
 parse_chars(char *chars, uint32_t char_count, struct token **tokens, uint32_t *token_count)
 {
-	callback = parse_mode_default;
 
+	if (char_count == 0) {
+		return 0;
+	}
+
+	callback = parse_mode_default;
 	/* Always have a non incrimented buffer. */
 	static_chars = chars;
 	/* Stores the current character being inspected. */

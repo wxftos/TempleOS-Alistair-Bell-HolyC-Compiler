@@ -3,3 +3,4 @@ holyc
 *.tar*
 checksums.txt
 src/hashtables/config.mk
+*.core
