@@ -25,7 +25,7 @@
 void
 arguments_help(void)
 {
-	fprintf(stdout, "holyc: usage [-%s] [-h help] [-v version] [-c source_file].\n", ARGUMENTS_HELP_PRETTY);
+	fprintf(stderr, "usage: holyc [-%s] [-h help] [-v version] [-c source_file].\n", ARGUMENTS_HELP_PRETTY);
 }
 void
 arguments_version(void)
