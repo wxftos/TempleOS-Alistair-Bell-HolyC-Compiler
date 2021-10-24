@@ -25,14 +25,14 @@
 void
 arguments_help(void)
 {
-	fprintf(stderr, "usage: holyc [-%s] [-h help] [-v version] [-c source_file].\n", ARGUMENTS_HELP_PRETTY);
+	fprintf(stderr, "usage: %s [-%s] [-h help] [-v version] [-c source_file].\n", getprogname(), ARGUMENTS_HELP_PRETTY);
 }
 void
 arguments_version(void)
 {
 	struct utsname u;
 	uname(&u);
-	fprintf(stdout, "holyc: version %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
+	fprintf(stdout, "version: %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
 }
 int8_t
 arguments_handle(const int32_t argc, const char **argv, struct arguments_data *data)
