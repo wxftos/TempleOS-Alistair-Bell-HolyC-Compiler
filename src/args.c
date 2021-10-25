@@ -1,5 +1,4 @@
-/* 
- * Copyright (c) 2021 Alistair Bell <alistair@alistairbell.xyz>
+/* * Copyright (c) 2021 Alistair Bell <alistair@alistairbell.xyz>
  *
  * HolyC compiler is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +24,7 @@
 void
 arguments_help(void)
 {
-	fprintf(stderr, "usage: %s [-%s] [-h help] [-v version] [-c source_file].\n", getprogname(), ARGUMENTS_HELP_PRETTY);
+	fprintf(stderr, "usage: %s [-%s] [-h help] [-v version] [-c source_file].\n", __progname, ARGUMENTS_HELP_PRETTY);
 }
 void
 arguments_version(void)
@@ -58,7 +57,7 @@ arguments_handle(const int32_t argc, const char **argv, struct arguments_data *d
 				return 1;
 			}
 			default: {
-				fprintf(stderr, "holyc: error unrecognised or invalid usage of flag -%c, run whith -h for a list of options.\n", (char)optopt);
+				fprintf(stderr, "error: unrecognised or invalid usage of flag -%c, run whith -h for a list of options.\n", (char)optopt);
 				return -1;
 			}
 		}

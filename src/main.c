@@ -27,7 +27,7 @@ handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *ch
 	/* Stat the file to check that it exists. */
 	struct stat st;
 	if (stat(file, &st) != 0) {
-		fprintf(stderr, "error unable to find file %s, does it exist?\n", file);	
+		fprintf(stderr, "error: unable to find file %s, does it exist?\n", file);	
 		return ENOENT;
 	}
 	/* Check that it actually has blocks. */
@@ -37,7 +37,7 @@ handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *ch
 
 	/* Validate that it is not a directory. */
 	if (S_ISDIR(st.st_mode)) {
-		fprintf(stderr, "error %s is a directory, please specify an actual source file!\n", file);
+		fprintf(stderr, "error: %s is a directory, please specify an actual source file!\n", file);
 		return ENOENT;
 	}
 
@@ -89,7 +89,7 @@ main(int argc, const char **argv)
 	char *chars = NULL;
 	uint32_t char_count = 0;
 	if (handle_file(target, "r", &chars , &char_count) != 0) {
-		fprintf(stderr, "error failed to compile %s, stage 1 failed.\n", target);
+		fprintf(stderr, "error: failed to compile %s, stage 1 failed.\n", target);
 		return 1;
 	}
 
@@ -101,7 +101,7 @@ main(int argc, const char **argv)
 	 struct token *tokens; 
 	 uint32_t token_count = 0;
 	 if (parse_chars(chars, char_count, &tokens, &token_count) < 0) {
-		fprintf(stderr, "error failed to compile %s, stage 2 failed.\n", target);
+		fprintf(stderr, "error: failed to compile %s, stage 2 failed.\n", target);
 		return 1;
 	 }
 

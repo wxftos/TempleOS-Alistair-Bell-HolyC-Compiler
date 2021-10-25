@@ -38,4 +38,6 @@
 #define ARRAY_LEN(arr)  \
 	sizeof(arr) / sizeof((arr)[0])
 
+extern char *__progname;
+
 #endif
