@@ -18,7 +18,7 @@
 #include "inc.h"
 #include "util.h"
 #include "args.h"
-#include "parser.h"
+#include "lexer.h"
 
 /* Opens the files, validates its present and not a dir, reads the chars into the buffer. */
 static int8_t 
@@ -100,7 +100,7 @@ main(int argc, const char **argv)
 	 */
 	 struct token *tokens; 
 	 uint32_t token_count = 0;
-	 if (parse_chars(chars, char_count, &tokens, &token_count) < 0) {
+	 if (lex_chars(chars, &tokens, &token_count) < 0) {
 		fprintf(stderr, "error: failed to compile %s, stage 2 failed.\n", target);
 		return 1;
 	 }

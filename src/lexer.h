@@ -1,5 +1,5 @@
-#ifndef HOLYC_PARSER_H
-#define HOLYC_PARSER_H
+#ifndef HOLYC_LEXER_H
+#define HOLYC_LEXER_H
 
 #include "inc.h"
 #include "util.h"
@@ -34,6 +34,6 @@ struct pinsor {
 };
 
 /* Turns the chars into tokens, populates the structures */
-int8_t parse_chars(char *, uint32_t, struct token **, uint32_t *);
+int8_t lex_chars(char *, struct token **, uint32_t *);
 
 #endif
