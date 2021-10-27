@@ -21,10 +21,7 @@ TARGET          = holyc
 INSTALL_DIR     = /usr/bin
 
 # Project Version.
-VERSION_MAJOR   = 0
-VERSION_MINOR   = 0
-VERSION_PATCH   = 15
-VERSION         = ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+VERSION         = 0.0.16
 
 # Append the version as a macro.
 CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
