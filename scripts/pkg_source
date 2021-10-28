@@ -4,9 +4,7 @@
 # Stores the working directory that the script was run from.
 cwd=$(pwd)
 src_dir=$(echo $cwd | sed 's/.*\///')
-ver=$(make version)
-# Output archive name.
-out=holyc.$ver.tar
+out=holyc.$(make version).tar
 
 # Will clean any objects or binaries present with `make clean`.
 ls holyc && make clean
@@ -16,7 +14,7 @@ ls *.tar.gz | xargs -I {} rm {}
 cd .. || (echo "script: error unable to go up a directory, check your rights!" ; exit 1)
 
 tar czf $out $src_dir 
-gzip $out
+gzip -9 $out
 # Move the archive to the root of the project
 mv $out.gz $cwd
 

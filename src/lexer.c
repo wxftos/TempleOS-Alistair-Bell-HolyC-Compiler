@@ -30,29 +30,54 @@
 typedef int8_t (*decider_func)(char *, char *, char *);
 
 static int8_t
-decider_whitespace(char *cchar, char *lchar, char *baton)
+decider_whitespace(char *rchar, char *lchar, char *baton)
 {
-	if (*cchar < 33 && *lchar > 32)
+	if (*rchar < 33 && *lchar > 32)
 		return 1;
-	else if (*cchar < 33 && *lchar < 33)
+	else if (*rchar < 33 && *lchar < 33)
 		return 2;
 	return 0;
 }
 static int8_t
-decider_string(char *cchar, char *lchar, char *baton)
+decider_string(char *rchar, char *lchar, char *baton)
 {
-	if (*cchar == *baton) {
+	if (*rchar == *baton) {
 		return 5;
 	}
 	return 3;
 }
+static int8_t
+decider_comment(char *rchar, char *lchar, char *baton)
+{
+	/* Multiline comment. */
+	switch (*baton) {
+		case '/': {
+			return 3 - (*rchar == '\n');
+		}
+		case '*': {
+			if (*lchar == '*' && *rchar == '/') {
+				/* Spoof the mode switcher. */
+				*baton = '\0';
+				return 2;
+			}
+		}
+	}
+	return 3;
+}
 static decider_func
-switch_decider(char *cchar, char *lchar, char *baton)
+switch_decider(char *rchar, char *lchar, char *baton)
 {
 	if (*baton == '\0') {
-		switch (*cchar) {
+		switch (*rchar) {
 			case '"':
-			case '\'': *baton = *cchar; return decider_string;
+			case '\'': *baton = *rchar; return decider_string;
+			case '/':
+			case '*': {
+				if (*lchar == '/' || *lchar == '*') {
+					*baton = *rchar;
+					return decider_comment;
+				}
+			}
 		}
 	}
 	*baton = '\0';
@@ -67,19 +92,20 @@ lex_chars(char *chars, struct token **out, uint32_t *count)
 	}
 
 
-	char *cchar = chars, *lchar = chars, baton = '\0';
+	char *rchar = chars, *lchar = chars, baton = '\0';
 	struct pinsor p = { 0, 0 };
 	decider_func f = decider_whitespace;
 
-	for (; *cchar != '\0'; ++cchar) {
-		switch (f(cchar, lchar, &baton)) {
+	for (; *rchar != '\0'; ++rchar) {
+		switch (f(rchar, lchar, &baton)) {
 			case 1: PRINT_TK(chars, p); break;
 			case 2: p.left = p.right + 1; break;
 			case 3: goto end_sequence;
 		}
-		f = switch_decider(cchar, lchar, &baton);
+		f = switch_decider(rchar, lchar, &baton);
 	end_sequence:
-		lchar = cchar;
+		lchar = rchar;
 		++p.right;
 	}
+	return 0;
 }
