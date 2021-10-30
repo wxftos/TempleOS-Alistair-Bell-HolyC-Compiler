@@ -45,6 +45,9 @@ is_special(char *rchar)
 		case '*':
 		case '=':
 			return 1;
+		case '\'':
+		case '"':
+			return 2;
 	}
 	return 0;
 }
@@ -59,6 +62,11 @@ lex_whitespace(char *lchar, char *rchar, char *baton)
 	}
 	return 0;
 }
+static int8_t
+lex_string(char *lchar, char *rchar, char *baton)
+{
+	return (*baton == *rchar) ? 3 : INT8_MAX;
+}
 
 static uint32_t
 recursive_lex(char *chars, char *lchar, char *rchar, char *wptr)
@@ -68,6 +76,29 @@ recursive_lex(char *chars, char *lchar, char *rchar, char *wptr)
 	static lex_mode func  = lex_whitespace;
 	
 	switch (func(lchar, rchar, &baton)) {
+		case 0: {
+			switch (is_special(rchar)) {
+				case 1: {
+					if (rchar != wptr) {
+						added += add_token(chars, rchar, wptr);
+						wptr = rchar;
+					}
+					added += add_token(chars, rchar + 1, wptr);
+					++wptr;
+					break;
+				}
+				case 2: {
+					if (rchar != wptr) {
+						added += add_token(chars, rchar, wptr);
+						wptr = rchar;
+					}
+					baton = *rchar;
+					func = lex_string;
+					break;
+				}
+			}
+			break;
+		}
 		case 1: {
 			if (wptr != rchar)
 				added += add_token(chars, rchar, wptr);
@@ -76,15 +107,9 @@ recursive_lex(char *chars, char *lchar, char *rchar, char *wptr)
 			wptr = rchar + 1;
 			break;
 		}
-		case 0: {
-			if (is_special(rchar)) {
-				if (rchar != wptr) {
-					added += add_token(chars, rchar, wptr);
-					wptr = rchar;
-				} 
-				added += add_token(chars, rchar + 1, wptr);
-				++wptr;
-			}
+		case 3: {
+			func = lex_whitespace;
+			break;
 		}
 	}
 	/* Incriment the rightmost char claw. */

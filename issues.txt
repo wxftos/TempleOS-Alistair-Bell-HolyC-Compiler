@@ -23,6 +23,7 @@ Crashes
 =======
 * Segfault on large files -> munmap_chunk(): invalid pointer. Possible issue with reallocation in src/parser.c: parser_add_token.
 Fixed -> commit 060c4760adc4304ad1b2567137d032e1380128e9, check for buffer writes outside the 64 char limit.
+* Segfault during lexer on files with no chars. Dataless files should skip the lexer entirely or fail the build.
 
 
 

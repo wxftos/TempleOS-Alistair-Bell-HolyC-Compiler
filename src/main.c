@@ -54,7 +54,6 @@ handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *ch
 	*/
 	size_t buffer_size = sizeof(*char_buffer) * (*char_count);
 	*char_buffer = (char *)malloc(buffer_size);
-	memset(*char_buffer, 0, buffer_size);
 
 	fread((void *)(*char_buffer), buffer_size, sizeof(*char_buffer), f);
 	fclose(f);

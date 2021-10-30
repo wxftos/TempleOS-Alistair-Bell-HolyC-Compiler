@@ -23,20 +23,17 @@ INSTALL_DIR     = /usr/bin
 # Project Version.
 VERSION         = 0.0.16
 
-# Append the version as a macro.
-CONFIG_CC_FLAGS := ${CONFIG_CC_FLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"'
-
 # Sources.
 .c.o:
 	@echo "cc $@"
-	@$(CC) $(CONFIG_CC_FLAGS) -c $< -o $@
+	@$(CC) $(CONFIG_CC_FLAGS) -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
 
 # The 'all' rule.
 all: prepare libraries ${TARGET}
 
 # Prepares the submodules
 prepare:
-	ln -sf $(shell pwd)/config.mk src/hashtable/config.mk
+	ln -sf ${PWD}/config.mk src/hashtable/config.mk
 
 libraries: 
 	make -C src/hashtable all
