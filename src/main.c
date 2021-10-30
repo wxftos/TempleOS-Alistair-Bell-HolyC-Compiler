@@ -89,7 +89,6 @@ main(int argc, const char **argv)
 	char *chars = NULL;
 	uint32_t char_count = 0;
 	if (handle_file(target, "r", &chars , &char_count) != 0) {
-		fprintf(stderr, "error: failed to compile %s, stage 1 failed.\n", target);
 		return 1;
 	}
 
@@ -101,7 +100,6 @@ main(int argc, const char **argv)
 	 struct token *tokens; 
 	 uint32_t token_count = 0;
 	 if (lex_chars(chars, &tokens, &token_count) < 0) {
-		fprintf(stderr, "error: failed to compile %s, stage 2 failed.\n", target);
 		return 1;
 	 }
 

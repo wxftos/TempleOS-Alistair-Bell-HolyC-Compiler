@@ -28,11 +28,6 @@ struct token {
 	hash_t hash;
 };
 
-struct pinsor {
-	uint32_t left;
-	uint32_t right;
-};
-
 /* Turns the chars into tokens, populates the structures */
 int8_t lex_chars(char *, struct token **, uint32_t *);
 

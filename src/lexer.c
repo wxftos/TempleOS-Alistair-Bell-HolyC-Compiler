@@ -19,93 +19,90 @@
 
 #define BUFF_SIZE 128
 
-#define PRINT_TK(c, p) \
-	{ \
-		char t[BUFF_SIZE] = { 0 }; \
-		strncpy(t, c + p.left, p.right - p.left); \
-		fprintf(stdout, "[%s]\n", t); \
-		p.left = p.right + 1; \
-	}
+typedef int8_t (*lex_mode)(char *, char *, char *);
 
-typedef int8_t (*decider_func)(char *, char *, char *);
+static uint32_t 
+add_token(char *chars, char *rchar, char *wptr)
+{
+	register long diff = (rchar - wptr);
+	char tmp[BUFF_SIZE] = { 0 };
+	strncpy(tmp, chars + (wptr - chars), diff);
+	fprintf(stdout, "%s\n", tmp);
+	return 1;
+}
 
 static int8_t
-decider_whitespace(char *rchar, char *lchar, char *baton)
+is_special(char *rchar)
 {
-	if (*rchar < 33 && *lchar > 32)
-		return 1;
-	else if (*rchar < 33 && *lchar < 33)
-		return 2;
+	switch (*rchar) {
+		case ')':
+		case '(':
+		case '{':
+		case '}':
+		case '[':
+		case ']':
+		case ';':
+		case '*':
+		case '=':
+			return 1;
+	}
 	return 0;
 }
+
 static int8_t
-decider_string(char *rchar, char *lchar, char *baton)
+lex_whitespace(char *lchar, char *rchar, char *baton)
 {
-	if (*rchar == *baton) {
-		return 5;
+	if (*lchar > 32 && *rchar < 33) {
+		return 1;
+	} else if (*lchar < 33 && *rchar < 33) {
+		return 2;
 	}
-	return 3;
+	return 0;
 }
-static int8_t
-decider_comment(char *rchar, char *lchar, char *baton)
+
+static uint32_t
+recursive_lex(char *chars, char *lchar, char *rchar, char *wptr)
 {
-	/* Multiline comment. */
-	switch (*baton) {
-		case '/': {
-			return 3 - (*rchar == '\n');
+	static char baton     = (char)0;
+	static uint32_t added = 0;
+	static lex_mode func  = lex_whitespace;
+	
+	switch (func(lchar, rchar, &baton)) {
+		case 1: {
+			if (wptr != rchar)
+				added += add_token(chars, rchar, wptr);
 		}
-		case '*': {
-			if (*lchar == '*' && *rchar == '/') {
-				/* Spoof the mode switcher. */
-				*baton = '\0';
-				return 2;
+		case 2: {
+			wptr = rchar + 1;
+			break;
+		}
+		case 0: {
+			if (is_special(rchar)) {
+				if (rchar != wptr) {
+					added += add_token(chars, rchar, wptr);
+					wptr = rchar;
+				} 
+				added += add_token(chars, rchar + 1, wptr);
+				++wptr;
 			}
 		}
 	}
-	return 3;
-}
-static decider_func
-switch_decider(char *rchar, char *lchar, char *baton)
-{
-	if (*baton == '\0') {
-		switch (*rchar) {
-			case '"':
-			case '\'': *baton = *rchar; return decider_string;
-			case '/':
-			case '*': {
-				if (*lchar == '/' || *lchar == '*') {
-					*baton = *rchar;
-					return decider_comment;
-				}
-			}
-		}
-	}
-	*baton = '\0';
-	return decider_whitespace;
-}
+	/* Incriment the rightmost char claw. */
+	lchar = rchar;
+	++rchar;
+	return (*rchar != 0) ? recursive_lex(chars, lchar, rchar, wptr) : added;
+ }
 
 int8_t
 lex_chars(char *chars, struct token **out, uint32_t *count)
 {
 	if (*chars == '\0') {
-		return *chars;
+		return 0;
 	}
-
-
-	char *rchar = chars, *lchar = chars, baton = '\0';
-	struct pinsor p = { 0, 0 };
-	decider_func f = decider_whitespace;
-
-	for (; *rchar != '\0'; ++rchar) {
-		switch (f(rchar, lchar, &baton)) {
-			case 1: PRINT_TK(chars, p); break;
-			case 2: p.left = p.right + 1; break;
-			case 3: goto end_sequence;
-		}
-		f = switch_decider(rchar, lchar, &baton);
-	end_sequence:
-		lchar = rchar;
-		++p.right;
-	}
-	return 0;
+	
+	char *wptr = (char *)chars;
+	*count = recursive_lex(chars, chars, chars, wptr);
+	*out = (struct token *)malloc((*count) * sizeof(*(*out)));
+	fprintf(stdout, "tokens = %d\n", *count);
+	return -1;
 }
