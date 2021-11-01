@@ -18,13 +18,13 @@
 
 #include "args.h"
 
-#define ARGUMENTS_HELP_STRING "hvc:"
-#define ARGUMENTS_HELP_PRETTY "hvc"
+#define ARGUMENTS_HELP_STRING "c:hv"
+#define ARGUMENTS_HELP_PRETTY "chv"
 
 void
 arguments_help(void)
 {
-	fprintf(stderr, "usage: %s [-%s] [-h help] [-v version] [-c source_file].\n", __progname, ARGUMENTS_HELP_PRETTY);
+	fprintf(stderr, "usage: %s [-%s] [-c to_compile] [-h help] [-v version].\n", __progname, ARGUMENTS_HELP_PRETTY);
 }
 void
 arguments_version(void)
