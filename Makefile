@@ -24,7 +24,7 @@ VERSION         = 0.0.16
 # Sources.
 .c.o:
 	@echo "cc $@"
-	@$(CC) $(CCFLAGS) -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
+	@$(CC) ${CFLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
 
 all: libraries ${TARGET}
 
@@ -34,7 +34,7 @@ libraries:
 
 ${TARGET}: ${OBJECTS} 
 	@echo "cc ${TARGET}"
-	@$(CC) $(LDFLAGS) -L src/hashtable -o $@ ${OBJECTS} -lhashtable $(LDLIBS)
+	@$(CC) ${LDFLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${LDLIBS}
 
 clean:
 	rm src/*.o
