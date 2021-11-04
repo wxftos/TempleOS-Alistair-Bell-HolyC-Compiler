@@ -13,37 +13,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-include config.mk
+-include config.mk
 
 SOURCES         = src/main.c src/lexer.c src/util.c src/args.c
 OBJECTS         = ${SOURCES:.c=.o}
 TARGET          = holyc
 INSTALL_DIR     = /usr/bin
-
-# Project Version.
 VERSION         = 0.0.16
 
 # Sources.
 .c.o:
 	@echo "cc $@"
-	@$(CC) $(CONFIG_CC_FLAGS) -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
+	@$(CC) $(CCFLAGS) -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
 
-# The 'all' rule.
-all: prepare libraries ${TARGET}
-
-# Prepares the submodules
-prepare:
-	ln -sf ${PWD}/config.mk src/hashtable/config.mk
+all: libraries ${TARGET}
 
 libraries: 
+	ln -sf ${PWD}/config.mk src/hashtable/config.mk
 	make -C src/hashtable all
 
-# Final linking.
 ${TARGET}: ${OBJECTS} 
 	@echo "cc ${TARGET}"
-	@$(CC) ${CONFIG_LD_FLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${CONFIG_LD_LIBS}
+	@$(CC) $(LDFLAGS) -L src/hashtable -o $@ ${OBJECTS} -lhashtable $(LDLIBS)
 
-# Handy rules. 
 clean:
 	rm src/*.o
 	make -C src/hashtable clean
@@ -54,10 +46,16 @@ install: all
 	install -s -m755 ${TARGET} ${INSTALL_DIR}
 
 uninstall:
-	rm ${INSTALL_DIR}/${TARGET}
+	$(RM) ${INSTALL_DIR}/${TARGET}
 
 version:
 	@echo ${VERSION}
 
+info:
+	@echo "CC      -> $(CC)"
+	@echo "AR      -> $(AR)"
+	@echo "CFLAGS  -> ${CFLAGS}"
+	@echo "LDFLAGS -> ${LDFLAGS}"
+	@echo "LDLIBS  -> ${LDLIBS}"
 
-.PHONY: clean install uninstall version
+.PHONY: clean install uninstall version build_info

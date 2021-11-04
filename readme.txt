@@ -13,7 +13,8 @@ Cloning
 
 Building
 --------
-* ``make all && make install``
+* Unix like systems. ``make all && make install``
+* To build in release mode ->  ``make CFLAGS='-O3 -pipe' all && make install'
 
 License
 -------
