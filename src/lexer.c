@@ -19,15 +19,23 @@
 
 #define BUFF_SIZE 128
 
-typedef int8_t (*lex_mode)(char *, char *, char *);
+typedef int8_t (*lex_mode)(char *, char *, char *, void **);
+
+static uint64_t line_number = 1;
+
+#define ADD_TOKEN_CHECK(count, chars, rchar, wptr) \
+	if (wptr != rchar) { \
+		*count += add_token(chars, rchar, wptr); \
+		wptr = rchar; \
+	}
 
 static uint32_t 
 add_token(char *chars, char *rchar, char *wptr)
 {
-	register long diff = (rchar - wptr);
-	char tmp[BUFF_SIZE] = { 0 };
-	strncpy(tmp, chars + (wptr - chars), diff);
-	fprintf(stdout, "%s\n", tmp);
+	register size_t diff = (rchar - wptr);
+	char char_buff[BUFF_SIZE] = { 0 };
+	strncpy(char_buff, chars + (wptr - chars), diff);
+	fprintf(stdout, "line %3ld -> %s\n", line_number, char_buff);
 	return 1;
 }
 
@@ -35,6 +43,8 @@ static int8_t
 is_special(char *rchar)
 {
 	switch (*rchar) {
+		case '+':
+		case '-':
 		case ')':
 		case '(':
 		case '{':
@@ -42,18 +52,20 @@ is_special(char *rchar)
 		case '[':
 		case ']':
 		case ';':
-		case '*':
 		case '=':
 			return 1;
 		case '\'':
 		case '"':
 			return 2;
+		case '*':
+		case '/':
+			return 3;
 	}
 	return 0;
 }
 
 static int8_t
-lex_whitespace(char *lchar, char *rchar, char *baton)
+lex_whitespace(char *lchar, char *rchar, char *baton, void **func)
 {
 	if (*lchar > 32 && *rchar < 33) {
 		return 1;
@@ -63,71 +75,93 @@ lex_whitespace(char *lchar, char *rchar, char *baton)
 	return 0;
 }
 static int8_t
-lex_string(char *lchar, char *rchar, char *baton)
+lex_string(char *lchar, char *rchar, char *baton, void **func)
 {
-	return (*baton == *rchar) ? 3 : INT8_MAX;
+	if (*rchar == *baton) {
+		*func = (void **)lex_whitespace;
+	}
+	return INT8_MAX;
 }
-
-static uint32_t
-recursive_lex(char *chars, char *lchar, char *rchar, char *wptr)
+static int8_t
+lex_comment(char *lchar, char *rchar, char *baton, void **func)
 {
-	static char baton     = (char)0;
-	static uint32_t added = 0;
-	static lex_mode func  = lex_whitespace;
-	
-	switch (func(lchar, rchar, &baton)) {
-		case 0: {
-			switch (is_special(rchar)) {
-				case 1: {
-					if (rchar != wptr) {
-						added += add_token(chars, rchar, wptr);
-						wptr = rchar;
-					}
-					added += add_token(chars, rchar + 1, wptr);
-					++wptr;
-					break;
-				}
-				case 2: {
-					if (rchar != wptr) {
-						added += add_token(chars, rchar, wptr);
-						wptr = rchar;
-					}
-					baton = *rchar;
-					func = lex_string;
-					break;
-				}
+	switch (*baton) {
+		case '/': {
+			if (*rchar == '\n') {
+				*func = (void *)lex_whitespace;
 			}
 			break;
 		}
-		case 1: {
-			if (wptr != rchar)
-				added += add_token(chars, rchar, wptr);
-		}
-		case 2: {
-			wptr = rchar + 1;
-			break;
-		}
-		case 3: {
-			func = lex_whitespace;
-			break;
+		case '*': {
+			if (*lchar == '*' && *rchar == '/') {
+				*func = (void *)lex_whitespace;
+			}
 		}
 	}
-	/* Incriment the rightmost char claw. */
-	lchar = rchar;
-	++rchar;
-	return (*rchar != 0) ? recursive_lex(chars, lchar, rchar, wptr) : added;
- }
-
+	return 2;
+}
 int8_t
 lex_chars(char *chars, struct token **out, uint32_t *count)
 {
 	if (*chars == '\0') {
-		return 0;
+		return (int8_t)*chars;
 	}
 	
-	char *wptr = (char *)chars;
-	*count = recursive_lex(chars, chars, chars, wptr);
-	*out = (struct token *)malloc((*count) * sizeof(*(*out)));
-	fprintf(stdout, "tokens = %d\n", *count);
-	return -1;
-}
+	char *lchar = chars, *rchar = chars, *wptr = chars;
+	char baton = (char)0;
+	lex_mode func = lex_whitespace;
+	
+	while (*rchar != '\0') {
+		switch (func(lchar, rchar, &baton, (void **)&func)) {
+			case 0: {
+				/* SPECIAL SWITCH. */
+				switch (is_special(rchar)) {
+					case 1: {
+						ADD_TOKEN_CHECK(count, chars, rchar, wptr);
+						*count += add_token(chars, rchar + 1, wptr);
+						++wptr;
+						break;
+					}
+					case 2: {
+						ADD_TOKEN_CHECK(count, chars, rchar, wptr);
+						baton = *rchar;
+						func = lex_string;
+						break;
+					}
+					case 3: {
+						if (*lchar == '/') {
+							if (*rchar == '/' || *rchar == '*') {
+								baton = *rchar;
+								func = lex_comment;
+							} else {
+								ADD_TOKEN_CHECK(count, chars, rchar, wptr);
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case 1: {
+				ADD_TOKEN_CHECK(count, chars, rchar, wptr);
+			}
+			case 2: {
+				wptr = rchar + 1;
+				break;
+			}
+		}
+		/* Update the newline counter if applicable, set the lchar to rchar then incriment rchar. */
+		line_number += (*rchar == '\n');
+		lchar = rchar;
+		++rchar;
+	}
+
+	/* Check that the mode is whitespace, if not than an error has occured. */
+	if (func == lex_string) {
+		fprintf(stdout, "error: %s not terminated, expected terminator [%c] at end of file!\n", (baton == '\'') ? "character sequence" : "string", baton);
+		return -1;
+	}
+	fprintf(stdout, "token count %d\n", *count);
+	*out = (struct token *)malloc(10);
+	return 0;
+ }
