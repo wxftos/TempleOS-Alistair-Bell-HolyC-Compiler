@@ -33,8 +33,8 @@ arguments_version(void)
 	uname(&u);
 	fprintf(stdout, "version: %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
 }
-int8_t
-arguments_handle(const int32_t argc, const char **argv, struct arguments_data *data)
+int
+arguments_handle(const int argc, const char **argv, struct arguments_data *data)
 {
 	/* Disable error message, use custom instead. */
 	opterr = 0;

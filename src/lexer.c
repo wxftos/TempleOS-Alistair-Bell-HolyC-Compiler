@@ -19,9 +19,9 @@
 
 #define BUFF_SIZE 128
 
-typedef int8_t (*lex_mode)(char *, char *, char *, void **);
+typedef int (*lex_mode)(char *, char *, char *, void **);
 
-static uint64_t line_number = 1;
+static unsigned long line_number = 1;
 
 #define ADD_TOKEN_CHECK(count, chars, rchar, wptr) \
 	if (wptr != rchar) { \
@@ -29,7 +29,7 @@ static uint64_t line_number = 1;
 		wptr = rchar; \
 	}
 
-static uint32_t 
+static unsigned int 
 add_token(char *chars, char *rchar, char *wptr)
 {
 	register size_t diff = (rchar - wptr);
@@ -39,7 +39,7 @@ add_token(char *chars, char *rchar, char *wptr)
 	return 1;
 }
 
-static int8_t
+static int
 is_special(char *rchar)
 {
 	switch (*rchar) {
@@ -64,7 +64,7 @@ is_special(char *rchar)
 	return 0;
 }
 
-static int8_t
+static int
 lex_whitespace(char *lchar, char *rchar, char *baton, void **func)
 {
 	if (*lchar > 32 && *rchar < 33) {
@@ -74,7 +74,7 @@ lex_whitespace(char *lchar, char *rchar, char *baton, void **func)
 	}
 	return 0;
 }
-static int8_t
+static int
 lex_string(char *lchar, char *rchar, char *baton, void **func)
 {
 	if (*rchar == *baton) {
@@ -82,7 +82,7 @@ lex_string(char *lchar, char *rchar, char *baton, void **func)
 	}
 	return INT8_MAX;
 }
-static int8_t
+static int
 lex_comment(char *lchar, char *rchar, char *baton, void **func)
 {
 	switch (*baton) {
@@ -100,8 +100,8 @@ lex_comment(char *lchar, char *rchar, char *baton, void **func)
 	}
 	return 2;
 }
-int8_t
-lex_chars(char *chars, struct token **out, uint32_t *count)
+int
+lex_chars(char *chars, struct token **out, unsigned int *count)
 {
 	if (*chars == '\0') {
 		return (int8_t)*chars;

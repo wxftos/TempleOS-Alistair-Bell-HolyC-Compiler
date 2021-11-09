@@ -21,43 +21,44 @@
 #include "lexer.h"
 
 /* Opens the files, validates its present and not a dir, reads the chars into the buffer. */
-static int8_t 
-handle_file(const char *file, const char *mode, char **char_buffer, uint32_t *char_count)
+static int 
+handle_file(const char *file, char **chars, unsigned long *char_count)
 {
-	/* Stat the file to check that it exists. */
-	struct stat st;
-	if (stat(file, &st) != 0) {
-		fprintf(stderr, "error: unable to find file %s, does it exist?\n", file);	
-		return ENOENT;
+	struct stat sbuff = { 0 };
+	if (stat(file, &sbuff) < 0) {
+		fprintf(stderr, "error: unable to find file %s, does it exist?\n", file);
+		return -1;
 	}
-	/* Check that it actually has blocks. */
-	if (st.st_blocks <= 0) {
-		fprintf(stdout, "warning: file %s lacks chars, pointless to compile an empty file!\n", file);	
-	}
-
-	/* Validate that it is not a directory. */
-	if (S_ISDIR(st.st_mode)) {
-		fprintf(stderr, "error: %s is a directory, please specify an actual source file!\n", file);
-		return ENOENT;
+	if (S_ISDIR(sbuff.st_mode)) {
+		fprintf(stderr, "error: %s is directory, cannot compile a directory!\n", file);
+		return -1;
 	}
 
-	FILE *f = fopen(file, mode);
-
-	fseek(f, 0, SEEK_END);
+	FILE *f = fopen(file, "r");
+	if (f == NULL) {
+		register int snapshot = errno;
+		switch (snapshot) {
+			case EACCES: {
+				fprintf(stderr, "error: cannot open %s do you have the correct permissions?\n", file);
+				break;
+			}
+			default: {
+				fprintf(stderr, "error: cannot open %s, errno %d.\n", file, snapshot);
+			}
+		}
+		return -1;
+	}
+	
+	(void)fseek(f, 0, SEEK_END);
 	*char_count = ftell(f);
+	*chars = (char *)malloc((*char_count + 1) * sizeof(char));
+	/* Rewind the file pointer. */
 	rewind(f);
-
-	/* 
-	 * Allocate the buffer's memory.
-	 * Zero the new memory.
-	 * fread into the buffer returning success.
-	*/
-	size_t buffer_size = sizeof(*char_buffer) * (*char_count);
-	*char_buffer = (char *)malloc(buffer_size);
-
-	fread((void *)(*char_buffer), buffer_size, sizeof(*char_buffer), f);
+	/* Read our data into the char buffer. */
+	(void)fread((void *)(*chars), (*char_count + 1) * sizeof(char), 1, f);
+	/* Close the file handle. */
 	fclose(f);
-	return 0; 
+	return 1;
 }
 
 
@@ -86,8 +87,8 @@ main(int argc, const char **argv)
 	const char *target = data.compiling;
 
 	char *chars = NULL;
-	uint32_t char_count = 0;
-	if (handle_file(target, "r", &chars , &char_count) != 0) {
+	unsigned long char_count = 0;
+	if (handle_file(target, &chars , &char_count) < 0) {
 		return 1;
 	}
 
@@ -97,7 +98,7 @@ main(int argc, const char **argv)
 	 * The parser is smart and will not split strings and can identify strings against numerical constants.
 	 */
 	 struct token *tokens; 
-	 uint32_t token_count = 0;
+	 unsigned int token_count = 0;
 	 if (lex_chars(chars, &tokens, &token_count) < 0) {
 		return 1;
 	 }

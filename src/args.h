@@ -38,6 +38,6 @@ void arguments_version(void);
 /* Displays the license of the progam. */
 void arguments_license(void);
 /* Runs the argument parser, returns < 0 on no continue, returns the usefull stuff in the struct buffer passed in. */
-int8_t arguments_handle(int32_t, const char **, struct arguments_data *);
+int arguments_handle(int, const char **, struct arguments_data *);
 
 #endif

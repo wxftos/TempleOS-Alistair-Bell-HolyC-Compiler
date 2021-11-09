@@ -9,6 +9,6 @@ struct token {
 };
 
 /* Turns the chars into tokens, populates the structures */
-int8_t lex_chars(char *, struct token **, uint32_t *);
+int lex_chars(char *, struct token **, unsigned int *);
 
 #endif
