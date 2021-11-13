@@ -17,151 +17,128 @@
 
 #include "lexer.h"
 
-#define BUFF_SIZE 128
 
-typedef int (*lex_mode)(char *, char *, char *, void **);
+enum machine_flags {
+	FLAG_ADD_TOKEN = 0x1,
+	FLAG_NEW_PROC  = 0x2,
+};
 
-static unsigned long line_number = 1;
+struct state_machine {
+	unsigned int       flags;
+	unsigned int       flags_data;	
+	char               *wptr;
+};
 
-#define ADD_TOKEN_CHECK(count, chars, rchar, wptr) \
-	if (wptr != rchar) { \
-		*count += add_token(chars, rchar, wptr); \
-		wptr = rchar; \
-	}
-
-static unsigned int 
-add_token(char *chars, char *rchar, char *wptr)
-{
-	register size_t diff = (rchar - wptr);
-	char char_buff[BUFF_SIZE] = { 0 };
-	strncpy(char_buff, chars + (wptr - chars), diff);
-	fprintf(stdout, "line %3ld -> %s\n", line_number, char_buff);
-	return 1;
-}
+typedef int (*state_proc)(char *, char *, struct state_machine *);
 
 static int
-is_special(char *rchar)
+determine_special(char *rchar)
 {
 	switch (*rchar) {
-		case '+':
-		case '-':
-		case ')':
-		case '(':
-		case '{':
-		case '}':
-		case '[':
-		case ']':
-		case ';':
-		case '=':
-			return 1;
 		case '\'':
 		case '"':
 			return 2;
-		case '*':
-		case '/':
-			return 3;
+		case ';':
+		case '(':
+		case ')':
+		case '[':
+		case ']':
+		case '{':
+		case '}':
+		case '+':
+			return 1;
+		default:
+			return 0;
 	}
-	return 0;
 }
 
 static int
-lex_whitespace(char *lchar, char *rchar, char *baton, void **func)
+state_whitespace(char *lchar, char *rchar, struct state_machine *machine)
 {
-	if (*lchar > 32 && *rchar < 33) {
-		return 1;
-	} else if (*lchar < 33 && *rchar < 33) {
-		return 2;
+	if (*rchar < 33) {
+		if (*lchar < 33) {
+			++machine->wptr;
+		} else {
+			/* Tell the machine that we want a new token. */
+			machine->flags += FLAG_ADD_TOKEN;
+		}
+	} else {
+		/* The rchar was not whitespace, in this case check if it is special. */	
+		switch (determine_special(rchar)) {
+			case 1: {
+				break;
+			}
+			case 2: {
+				machine->flags      += FLAG_ADD_TOKEN;
+				machine->flags      += (determine_special(lchar) < 1 * FLAG_NEW_PROC);
+				/* Prepare the packet. */
+				machine->flags_data = 0x01;
+				machine->flags_data += (*rchar << 16);
+				break;
+			}
+		}
 	}
 	return 0;
 }
 static int
-lex_string(char *lchar, char *rchar, char *baton, void **func)
+state_string(char *lchar, char *rchar, struct state_machine *machine)
 {
-	if (*rchar == *baton) {
-		*func = (void **)lex_whitespace;
+	register char packed_char = (char)(machine->flags_data >> 16) & 0xff;
+	if (*rchar == packed_char) {
+		/* Call for a new token. */
+		machine->flags      = FLAG_NEW_PROC | FLAG_ADD_TOKEN;
+		/* This tells the machine to switch to whitespace mode and spoof the size of the strncpy call. */
+		machine->flags_data = 0;
+		machine->flags_data += (((rchar - machine->wptr) + 1) << 8);
 	}
-	return INT8_MAX;
+	return 0;
 }
 static int
-lex_comment(char *lchar, char *rchar, char *baton, void **func)
+state_comment(char *lchar, char *rchar, struct state_machine *machine)
 {
-	switch (*baton) {
-		case '/': {
-			if (*rchar == '\n') {
-				*func = (void *)lex_whitespace;
-			}
-			break;
-		}
-		case '*': {
-			if (*lchar == '*' && *rchar == '/') {
-				*func = (void *)lex_whitespace;
-			}
-		}
-	}
-	return 2;
+	return 0;
 }
+
+/* Declare our table of state machines, this is what the `state_machine->flag_data` can be set to on mode changes. */
+static const state_proc machine_table[] = { state_whitespace, state_string, state_comment };
+
 int
 lex_chars(char *chars, struct token **out, unsigned int *count)
 {
-	if (*chars == '\0') {
-		return (int8_t)*chars;
-	}
-	
-	char *lchar = chars, *rchar = chars, *wptr = chars;
-	char baton = (char)0;
-	lex_mode func = lex_whitespace;
-	
-	while (*rchar != '\0') {
-		switch (func(lchar, rchar, &baton, (void **)&func)) {
-			case 0: {
-				/* SPECIAL SWITCH. */
-				switch (is_special(rchar)) {
-					case 1: {
-						ADD_TOKEN_CHECK(count, chars, rchar, wptr);
-						*count += add_token(chars, rchar + 1, wptr);
-						++wptr;
-						break;
-					}
-					case 2: {
-						ADD_TOKEN_CHECK(count, chars, rchar, wptr);
-						baton = *rchar;
-						func = lex_string;
-						break;
-					}
-					case 3: {
-						if (*lchar == '/') {
-							if (*rchar == '/' || *rchar == '*') {
-								baton = *rchar;
-								func = lex_comment;
-							} else {
-								ADD_TOKEN_CHECK(count, chars, rchar, wptr);
-							}
-						}
-						break;
-					}
-				}
-				break;
-			}
-			case 1: {
-				ADD_TOKEN_CHECK(count, chars, rchar, wptr);
-			}
-			case 2: {
-				wptr = rchar + 1;
-				break;
-			}
-		}
-		/* Update the newline counter if applicable, set the lchar to rchar then incriment rchar. */
-		line_number += (*rchar == '\n');
-		lchar = rchar;
-		++rchar;
-	}
+	char *lchar = chars;
+	char *rchar = chars;
+	state_proc proc = state_whitespace;
+	struct state_machine machine = { .wptr = chars };
 
-	/* Check that the mode is whitespace, if not than an error has occured. */
-	if (func == lex_string) {
-		fprintf(stdout, "error: %s not terminated, expected terminator [%c] at end of file!\n", (baton == '\'') ? "character sequence" : "string", baton);
+	/* This prevents a segfault of memory read as the rchar is always set to the location -> (chars + 1). */
+	if (*(chars + 1) == '\0') {
 		return -1;
 	}
-	fprintf(stdout, "token count %d\n", *count);
-	*out = (struct token *)malloc(10);
-	return 0;
- }
+	do {
+		++rchar;
+		proc(lchar, rchar, &machine);
+		/* Handle the state machine. */
+		if (machine.flags & FLAG_ADD_TOKEN) {
+			char tmp[64] = { 0 };
+			/* The 2nd byte of the flags data tells us about the length of the new token. */
+			register unsigned int copy_size = (machine.flags_data >> 8) & 255;
+			strncpy(tmp, chars + (machine.wptr - chars), copy_size == 0 ? (rchar - machine.wptr) : copy_size);
+			fprintf(stdout, "[%s]\n", tmp);
+
+			machine.wptr = rchar + 1;
+			/* Remove the `add token` flag and reset the flags data. */
+			machine.flags &= ~(FLAG_ADD_TOKEN);
+			machine.flags_data = 0; 
+
+		} else if (machine.flags & FLAG_NEW_PROC) {
+			/* Update the proc function pointer to the lower 8 bits of the data, this is the convention. */
+			proc = machine_table[machine.flags_data & 0xff];
+			/* Remove the flag. */
+			machine.flags &= ~(FLAG_NEW_PROC);
+		}
+		lchar = rchar;
+	/* Loop until a null terminator is reached.  */
+	} while (*rchar != (char)0);
+
+	return -1;
+}

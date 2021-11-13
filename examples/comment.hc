@@ -1,5 +1,4 @@
-// this is a comment
-U8 non_comment = 'c';
+U8 non_comment = 'c';//this is a comment
 /* 
  * more comments 
  */
