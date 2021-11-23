@@ -19,7 +19,7 @@ SOURCES         = src/main.c src/lexer.c src/util.c src/args.c
 OBJECTS         = ${SOURCES:.c=.o}
 TARGET          = holyc
 INSTALL_DIR     = /usr/bin
-VERSION         = 0.0.16
+VERSION         = 0.0.17
 
 # Sources.
 .c.o:
