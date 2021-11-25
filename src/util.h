@@ -19,7 +19,6 @@
 #define HOLYC_UTIL_H
 
 #include "inc.h"
-#include "hashtable/src/extern.h"
 
 hash_t hash_chars(char *);
 

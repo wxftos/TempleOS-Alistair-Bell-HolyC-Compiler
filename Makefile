@@ -1,44 +1,21 @@
-# Copyright (c) 2021 Alistair Bell <alistair@alistairbell.xyz> 
-#
-# HolyC compiler is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 -include config.mk
 
-SOURCES         = src/main.c src/lexer.c src/util.c src/args.c
+SOURCES         = src/main.c src/lexer.c src/util.c src/args.c src/decipher.c
 OBJECTS         = ${SOURCES:.c=.o}
 TARGET          = holyc
 INSTALL_DIR     = /usr/bin
 VERSION         = 0.0.17
 
-# Sources.
+all: ${TARGET}
+
 .c.o:
-	@echo "cc $@"
-	@$(CC) ${CFLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
-
-all: libraries ${TARGET}
-
-libraries: 
-	ln -sf ${PWD}/config.mk src/hashtable/config.mk
-	make -C src/hashtable all
+	$(CC) ${CFLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
 
 ${TARGET}: ${OBJECTS} 
-	@echo "cc ${TARGET}"
-	@$(CC) ${LDFLAGS} -L src/hashtable -o $@ ${OBJECTS} -lhashtable ${LDLIBS}
+	$(CC) ${LDFLAGS} -o $@ ${OBJECTS} ${LDLIBS}
 
 clean:
 	rm src/*.o
-	make -C src/hashtable clean
 	rm ${TARGET}
 
 install: all

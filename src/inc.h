@@ -39,6 +39,8 @@
 #define ARRAY_LEN(arr)  \
 	sizeof(arr) / sizeof((arr)[0])
 
+typedef uint64_t hash_t;
+
 extern char *__progname;
 
 #endif
