@@ -17,7 +17,8 @@
 
 #include "lexer.h"
 
-#define BUFF_SIZE 128
+#define BUFF_SIZE 256
+#define PREALLOC_SIZE 50
 
 /* Forware declare the token structure. */
 struct machine;
@@ -41,9 +42,12 @@ new_token(char *chars, char *start, const unsigned long diff, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
-	fprintf(stdout, "|%s|\n", tmp);
-	return 0;
+	if (lex_decipher(out, tmp, diff) < 0) {
+		return -1;
+	}
+	return 1;
 }
+	
 static int 
 delim(char *in)
 {
@@ -151,10 +155,12 @@ change_mode:
 int
 lex_chars(char *in, struct token **out, unsigned int *count)
 {
-	struct machine machine = {
-		.last_write = &(*in),
-	};
 	char *rchar = in, *lchar = in;
+	*out = (struct token *)malloc(PREALLOC_SIZE * sizeof(*(*out)));
+	struct token *tptr = *out;
+	struct machine machine = { .last_write = &(*in) };
+	unsigned int alloc_count = PREALLOC_SIZE;
+
 	if (delim(in) == 2) {
 		machine.func = lex_string;
 		machine.baton = *in;
@@ -168,11 +174,15 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 		machine.func(rchar, lchar, &machine);
 
 		if (machine.new_token > 0) {
-			/* Add the first one. */			
-			*count += new_token(in, machine.start[0], machine.diff[0], NULL);
+			if ((*count - 2) >= alloc_count) {
+				alloc_count += PREALLOC_SIZE;
+				*out = (struct token *)realloc(*out, alloc_count * sizeof(*(*out)));
+			}
+			/* Add the first one. */
+			*count += new_token(in, machine.start[0], machine.diff[0], tptr);
 			--machine.new_token;
 			if (machine.new_token > 0) {
-				*count += new_token(in, machine.start[1], machine.diff[1], NULL);
+				*count += new_token(in, machine.start[1], machine.diff[1], tptr);
 			}
 			machine.new_token = 0;
 			machine.last_write = rchar + 1;
