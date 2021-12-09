@@ -25,22 +25,21 @@ char_type(const char in)
 	return TOKEN_UNKNOWN;
 }
 
-struct token
-lex_decipher(char *in, unsigned int diff)
+int
+lex_decipher(struct token *out, char *in, unsigned int diff)
 {
-	struct token t; 
 	if (diff < 2) {
-		if ((t.type = char_type(*in)) != TOKEN_UNKNOWN) {
+		if ((out->type = char_type(*in)) != TOKEN_UNKNOWN) {
 			/* Pack our data into the 64 bit value, there is not a need for their to be a hash. */
-			t.data = (hash_t)*in;
-			return t;
+			out->data = (hash_t)*in;
+			return 0;
 		} else {
 			/* No keyword or predefined type is 1 char wide, this means that it must be a new symbol. */
-			t.type = TOKEN_SYMBOL;
-			t.data = hash_chars(in);
+			out->type = TOKEN_SYMBOL;
+			out->data = hash_chars(in);
 		}
 	}
 
 
-	return t;
+	return 0;
 }

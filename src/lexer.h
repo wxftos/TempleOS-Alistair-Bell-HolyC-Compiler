@@ -21,6 +21,6 @@ struct token {
 
 /* Turns the chars into tokens, populates the structures */
 int lex_chars(char *, struct token **, unsigned int *);
-struct token lex_decipher(char *, unsigned int);
+int lex_decipher(struct token *, char *, unsigned int);
 
 #endif
