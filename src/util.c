@@ -20,10 +20,7 @@
 hash_t
 hash_chars(char *chars)
 {
-
-	/* Running of the hash first initialsed for bitshifts to work on the subsequent passes. */
 	hash_t total = 5381;
-
 	char c;
 	while ((c = *chars++)) {
 		total += ((total << 5) + total) + c;

@@ -1,6 +1,13 @@
+# Binaries
 holyc
+hashgen
+
+# Compiler/tool generated
 *.o
-*.tar*
-checksums.txt
-src/hashtables/config.mk
+*.a
+src/defs.h
+
+# Misc
 *.core
+*.tar*
+

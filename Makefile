@@ -6,13 +6,17 @@ TARGET          = holyc
 INSTALL_DIR     = /usr/bin
 VERSION         = 0.0.17
 
-all: ${TARGET}
+all: tools ${TARGET}
 
 .c.o:
 	$(CC) ${CFLAGS} -DHOLYC_BUILD_VERSION='"${VERSION}"' -c $< -o $@
 
 ${TARGET}: ${OBJECTS} 
 	$(CC) ${LDFLAGS} -o $@ ${OBJECTS} ${LDLIBS}
+
+tools:
+	make -C tools all
+	./tools/hashgen src/defs.h
 
 clean:
 	rm src/*.o
@@ -35,4 +39,4 @@ info:
 	@echo "LDFLAGS -> ${LDFLAGS}"
 	@echo "LDLIBS  -> ${LDLIBS}"
 
-.PHONY: clean install uninstall version build_info
+.PHONY: clean install uninstall version build_info tools

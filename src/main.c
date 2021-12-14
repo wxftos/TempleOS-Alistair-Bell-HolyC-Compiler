@@ -37,15 +37,7 @@ handle_file(const char *file, char **chars, unsigned long *char_count)
 	FILE *f = fopen(file, "r");
 	if (f == NULL) {
 		register int snapshot = errno;
-		switch (snapshot) {
-			case EACCES: {
-				fprintf(stderr, "error: cannot open %s do you have the correct permissions?\n", file);
-				break;
-			}
-			default: {
-				fprintf(stderr, "error: cannot open %s, errno %d.\n", file, snapshot);
-			}
-		}
+		fprintf(stderr, "error: fopen failed on %s, %s.\n", file, strerror(snapshot));	
 		return -1;
 	}
 	
