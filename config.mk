@@ -1,3 +1,3 @@
-CFLAGS  = -std=c89 -Wextra -Wall 
+CFLAGS  = -std=c89 -Wextra
 LDFLAGS =
 LDLIBS  =

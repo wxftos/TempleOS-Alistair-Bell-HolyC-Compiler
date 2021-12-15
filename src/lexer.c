@@ -42,7 +42,7 @@ new_token(char *chars, char *start, const unsigned long diff, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
-	if (lex_decipher(out, tmp, diff) < 0) {
+	if (lex_decipher(out, tmp, start, diff) < 0) {
 		return -1;
 	}
 	return 1;
@@ -64,6 +64,14 @@ delim(char *in)
 		case '-':
 		case '/':
 		case '*':
+		case '%':
+		case '<':
+		case '>':
+		case '^':
+		case '|':
+		case '!':
+		case '&':
+		case '~':
 			return 1;
 		case '\'':
 		case '"':

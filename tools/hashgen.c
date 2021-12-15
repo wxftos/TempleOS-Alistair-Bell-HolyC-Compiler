@@ -91,6 +91,13 @@ main(int argc, const char *argv[])
 		fprintf(stderr,"error: no output specified.\n");
 		return 1;
 	}
+	/* Save compile clock cycles. */
+	struct stat s1, s2;
+	if (stat(argv[0], &s1) == 0 && stat(argv[1], &s2) == 0) {
+		if (s1.st_mtime < s2.st_mtime) {
+			return 0;
+		}
+	} 
 
 	struct out out_types[types_len];
 	struct out out_keywords[keywords_len];
@@ -106,9 +113,10 @@ main(int argc, const char *argv[])
 		out_keywords[i].hash = hash_chars((char *) keywords[i]);
 	}
 
-	/* Sort. */
+	/* Sort 
 	qsort(out_types, types_len, sizeof(struct out), sort_func);
 	qsort(out_keywords, keywords_len, sizeof(struct out), sort_func);
+	*/
 
 	/* Dump. */
 	FILE *f = fopen(argv[1], "w");

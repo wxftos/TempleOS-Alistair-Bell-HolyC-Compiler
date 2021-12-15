@@ -1,4 +1,4 @@
-include ../config.mk
+-include ../config.mk
 
 HG_SOURCES = hashgen.c 
 HG_OBJECTS = ${HG_SOURCES:.c=.o} 

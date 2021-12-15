@@ -19,6 +19,7 @@ tools:
 	./tools/hashgen src/defs.h
 
 clean:
+	make -C tools clean
 	rm src/*.o
 	rm ${TARGET}
 
