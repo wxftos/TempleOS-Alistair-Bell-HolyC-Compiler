@@ -21,6 +21,7 @@ tools:
 clean:
 	make -C tools clean
 	rm src/*.o
+	rm src/defs.h
 	rm ${TARGET}
 
 install: all

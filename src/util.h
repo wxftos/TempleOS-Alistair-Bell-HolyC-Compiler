@@ -21,6 +21,7 @@
 #include "inc.h"
 
 hash_t hash_chars(char *);
+int validate_constant(char *, const unsigned int);
 
 
 #endif

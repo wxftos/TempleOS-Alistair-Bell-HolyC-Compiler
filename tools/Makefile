@@ -10,7 +10,7 @@ HG_OUT     = hashgen
 all: ${HG_OUT}
 
 ${HG_OUT}: ${HG_OBJECTS}
-	$(CC) -o ${HG_OUT} ${HG_SOURCES}
+	$(CC) $(LDFLAGS) -o ${HG_OUT} ${HG_SOURCES}
 
 
 clean:

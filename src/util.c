@@ -27,3 +27,20 @@ hash_chars(char *chars)
 	}
 	return total;
 }
+int
+validate_constant(char *in, const unsigned int diff)
+{
+	/* Validates whether constant numbers, or values are in the correct format. */
+	if (isdigit(in[1]) != 1) {
+		switch (in[1]) {
+			case 'x': {
+			}
+			case 'b': {
+			}
+			default: {
+				fprintf(stderr, "error: numerical constant %s has invalid base escape sequence '%c'.\n", in, in[1]);
+				return -1;
+			}
+		}
+	}
+}

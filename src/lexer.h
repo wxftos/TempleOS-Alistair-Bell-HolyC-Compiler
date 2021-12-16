@@ -9,6 +9,7 @@ enum token_category {
 	TOKEN_UNKNOWN = 0,
 	TOKEN_KEYWORD,
 	TOKEN_SYMBOL,
+	TOKEN_TYPE,
 	TOKEN_OPERATOR,
 	TOKEN_ASSIGNMENT,
 	TOKEN_SCOPER,
@@ -26,6 +27,7 @@ enum token_type {
 	TYPE_I32,
 	TYPE_I64,
 	TYPE_F64,
+	TYPE_BOOLEAN,
 };
 /* Types of constants: 0.0f, 10, "hello" etc. */
 enum token_constant {
@@ -53,6 +55,27 @@ enum token_operator {
 	OPERATOR_OC,
 	OPERATOR_GT,
 	OPERATOR_LT,
+};
+enum token_keyword {
+	KEYWORD_break,
+	KEYWORD_case,
+	KEYWORD_class,
+	KEYWORD_const,
+	KEYWORD_continue,
+	KEYWORD_default,
+	KEYWORD_do,
+	KEYWORD_else,
+	KEYWORD_enum,
+	KEYWORD_extern,
+	KEYWORD_for,
+	KEYWORD_goto,
+	KEYWORD_if,
+	KEYWORD_return,
+	KEYWORD_static,
+	KEYWORD_struct,
+	KEYWORD_switch,
+	KEYWORD_union,
+	KEYWORD_while,
 };
 
 struct token {
