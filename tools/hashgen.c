@@ -1,5 +1,4 @@
 #include "../src/inc.h"
-#define _GNU_SOURCE
 #include <stdio.h>
 
 static const char *types[] = {
@@ -58,19 +57,6 @@ hash_chars(char *chars)
 		total += ((total << 5) + total) + c;
 	}
 	return total;
-}
-
-static void
-printo(struct out *o)
-{
-	fprintf(stdout, "[%10s][%16lu]\n", o->str, o->hash);
-}
-static int 
-sort_func(const void *v1, const void *v2)
-{
-	register struct out *o1 = (struct out *)v1;
-	register struct out *o2 = (struct out *)v2;
-	return o1->hash > o2->hash;
 }
 static void 
 dump_as_array(const struct out out[], const char *head, const char *name, unsigned int len, FILE *f)

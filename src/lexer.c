@@ -42,10 +42,7 @@ new_token(char *chars, char *start, const unsigned long diff, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
-	if (lex_decipher(out, tmp, start, diff) < 0) {
-		return -1;
-	}
-	return 1;
+	return lex_decipher(out, tmp, start, diff) > 0;
 }
 	
 static int 

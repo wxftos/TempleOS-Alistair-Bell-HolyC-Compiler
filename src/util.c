@@ -28,7 +28,7 @@ hash_chars(char *chars)
 	return total;
 }
 int
-validate_constant(char *in, const unsigned int diff)
+validate_numerical_constant(char *in, const unsigned int diff)
 {
 	/* Validates whether constant numbers, or values are in the correct format. */
 	if (isdigit(in[1]) != 1) {

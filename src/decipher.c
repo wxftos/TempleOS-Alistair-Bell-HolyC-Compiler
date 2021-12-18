@@ -1,12 +1,6 @@
 #include "lexer.h"
 #include "defs.h"
 
-int
-lex_is_special(const char c)
-{
-	switch (c) {
-	}
-}
 
 static const unsigned char single_lookup[][2] = {
 	/* Operators. */
@@ -33,17 +27,6 @@ static const unsigned char single_lookup[][2] = {
 	['('] = { TOKEN_SCOPER, '(' },
 };
 
-static int
-single_char(const char in, char *category, char *type)
-{
-	if (isdigit(in) != 0) {
-		*category = TOKEN_CONSTANT;
-		*type = CONSTANT_INTEGER;
-	} else {
-		
-	}
-}
-
 #define CSET(h, c, t)            \
 	case h: {                    \
  		out->category = c;       \
@@ -56,9 +39,9 @@ int
 lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 {
 	if (diff == 1) {
-		if (single_lookup[*in][0] != 0) {
-			out->category = single_lookup[*in][0];
-			out->type     = single_lookup[*in][1];
+		if (single_lookup[(int)*in][0] != 0) {
+			out->category = single_lookup[(int)*in][0];
+			out->type     = single_lookup[(int)*in][1];
 			out->specific = (hash_t)*in;
 		} else {
 			if (isdigit(*in)) {
@@ -73,16 +56,25 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 		}
 	} else {
 		if (*in == '\'' || *in == '"') {
-			out->category = TOKEN_CONSTANT;
-			out->type     = CONSTANT_STRING;
-			out->specific = diff;
-			out->start    = raw_start;
+			*out = (struct token) {
+				.category = TOKEN_CONSTANT,
+				.type     = CONSTANT_STRING,
+				.specific = diff,
+				.start    = raw_start,
+			};
+			return 0;
 		} else if (isdigit(*in) != 0) {
-			if (validate_constant(in, diff) < 0) {
+			int result;	
+			if ((result = validate_numerical_constant(in, diff)) < 0) {
 				return -1;
 			}
+			*out = (struct token) {
+				.category = TOKEN_CONSTANT,
+				.type     = (enum token_constant)result,
+				.specific = (hash_t)(out->type == CONSTANT_INTEGER) ? atol(in) : atof(in),
+				.start = raw_start,
+			};
 		}
-
 		/* Compare the hash of the string coming in compared to our generated hashes from src/defs.h. */
 		const hash_t hash_in = hash_chars(in);
 		switch (hash_in) {
@@ -123,4 +115,5 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 		}
 	}
 	out->start = raw_start;
+	return 0;
 }
