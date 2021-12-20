@@ -13,7 +13,7 @@
 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef HOLYC_UTIL_H
 #define HOLYC_UTIL_H
@@ -21,7 +21,7 @@
 #include "inc.h"
 
 hash_t hash_chars(char *);
-int validate_numerical_constant(char *, const unsigned int);
+hash_t validate_numerical_constant(char *, const unsigned int, unsigned int *);
 
 
 #endif

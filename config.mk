@@ -1,3 +1,3 @@
-CFLAGS  = -std=c89 -Wextra -g
+CFLAGS  = -std=c89 -Wextra -g -D_DEFAULT_SOURCE
 LDFLAGS =
 LDLIBS  =

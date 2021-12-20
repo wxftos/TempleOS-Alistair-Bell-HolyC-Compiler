@@ -42,7 +42,7 @@ new_token(char *chars, char *start, const unsigned long diff, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
-	return lex_decipher(out, tmp, start, diff) > 0;
+	return lex_decipher(out, tmp, start, diff);
 }
 	
 static int 
@@ -153,18 +153,24 @@ lex_comment(char *rchar, char *lchar, struct machine *machine)
 change_mode:
 	machine->func = lex_default;
 	machine->last_write = rchar + 1;
-
 	return;
 }
 
 int
 lex_chars(char *in, struct token **out, unsigned int *count)
 {
-	char *rchar = in, *lchar = in;
-	*out = (struct token *)malloc(PREALLOC_SIZE * sizeof(*(*out)));
-	struct token *tptr = *out;
-	struct machine machine = { .last_write = &(*in) };
+	/* Keeps track of the allocation count of the returned buffer. */
 	unsigned int alloc_count = PREALLOC_SIZE;
+	/* Allows the insertion of tokens to fail and trigger the failure of the mainloop. */
+	signed int interupt = 0;
+
+	/* Like pinsors to extract strings and substrings. */
+	char *rchar = in;
+	char *lchar = in;
+	struct machine machine = { .last_write = &(*in) };
+	*out = (struct token *)malloc(PREALLOC_SIZE * sizeof(*(*out)));
+	/* Output of where token data is stored. */
+	struct token *tptr = *out;
 
 	if (delim(in) == 2) {
 		machine.func = lex_string;
@@ -179,20 +185,26 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 		machine.func(rchar, lchar, &machine);
 
 		if (machine.new_token > 0) {
-			if ((*count - 2) >= alloc_count) {
+			if ((*count - machine.new_token) >= alloc_count) {
 				alloc_count += PREALLOC_SIZE;
 				*out = (struct token *)realloc(*out, alloc_count * sizeof(*(*out)));
 			}
 			/* Add the first one. */
-			*count += new_token(in, machine.start[0], machine.diff[0], tptr);
-			--machine.new_token;
-			if (machine.new_token > 0) {
-				*count += new_token(in, machine.start[1], machine.diff[1], tptr);
+			interupt = new_token(in, machine.start[0], machine.diff[0], tptr);
+			++(*count);
+			if (interupt < 0)
+				return -1;
+
+			if (machine.new_token > 1) {
+				interupt = new_token(in, machine.start[1], machine.diff[1], tptr);
+				if (interupt < 0)
+					return -1;
+				++(*count);
 			}
 			machine.new_token = 0;
 			machine.last_write = rchar + 1;
 		}
 		lchar = rchar;
 	} while (*rchar != (char)0);
-	return -1;
+	return interupt;
 }

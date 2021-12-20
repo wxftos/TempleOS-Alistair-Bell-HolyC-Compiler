@@ -64,8 +64,8 @@ dump_as_array(const struct out out[], const char *head, const char *name, unsign
 	unsigned int i;
 	DSTR(head, f);
 	for (i = 0; i < len; ++i) {
-		char tmp[64] = { 0 };
-		sprintf(tmp, "#define HASH_%s_%s %lu\n", name, out[i].str, out[i].hash);
+		char tmp[128] = { 0 };
+		sprintf(tmp, "#define HASH_%s_%s (hash_t)%lu\n", name, out[i].str, out[i].hash);
 		DSTR(tmp, f);
 	}
 }

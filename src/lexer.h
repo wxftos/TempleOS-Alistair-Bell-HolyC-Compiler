@@ -82,7 +82,7 @@ struct token {
 	unsigned char category;
 	unsigned char type;
 	hash_t        specific;
-	void          *start;
+	char          *start;
 };
 
 /* Turns the chars into tokens, populates the structures */

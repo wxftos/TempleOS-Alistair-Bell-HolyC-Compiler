@@ -95,9 +95,7 @@ main(int argc, const char **argv)
 		return 1;
 	 }
 
-	if (token_count != 0) {
-		free(tokens);
-	}
+	free(tokens);
 	free(chars);
 	return 0;
 }
