@@ -42,6 +42,8 @@ new_token(char *chars, char *start, const unsigned long diff, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
+	out->offset = start - chars;
+	out->diff   = diff;
 	return lex_decipher(out, tmp, start, diff);
 }
 	
@@ -192,18 +194,20 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 			/* Add the first one. */
 			interupt = new_token(in, machine.start[0], machine.diff[0], tptr);
 			++(*count);
+			++tptr;
 			if (interupt < 0)
 				return -1;
-
 			if (machine.new_token > 1) {
 				interupt = new_token(in, machine.start[1], machine.diff[1], tptr);
 				if (interupt < 0)
 					return -1;
 				++(*count);
+				++tptr;
 			}
 			machine.new_token = 0;
 			machine.last_write = rchar + 1;
 		}
+
 		lchar = rchar;
 	} while (*rchar != (char)0);
 	return interupt;

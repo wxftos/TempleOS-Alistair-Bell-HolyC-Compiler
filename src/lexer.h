@@ -6,8 +6,9 @@
 
 /* What category it falls into. */
 enum token_category {
-	TOKEN_UNKNOWN = 0,
+	TOKEN_UNKNOWN,
 	TOKEN_KEYWORD,
+	TOKEN_MODIFIER,
 	TOKEN_SYMBOL,
 	TOKEN_TYPE,
 	TOKEN_OPERATOR,
@@ -18,6 +19,7 @@ enum token_category {
 };
 /* Types. */
 enum token_type {
+	TYPE_U0,
 	TYPE_U8,
 	TYPE_U16,
 	TYPE_U32,
@@ -37,11 +39,9 @@ enum token_constant {
 };
 enum token_modifier {
 	/* Declaration modifiers. */
-	MODIFIER_CONST,
-	MODIFIER_STATIC,
-	MODIFIER_EXTERN,
-	MODIFIER_SIGNED,
-	MODIFIER_UNSIGNED,
+	MODIFIER_const,
+	MODIFIER_static,
+	MODIFIER_extern,
 };
 enum token_operator {
 	OPERATOR_ADD,
@@ -60,18 +60,15 @@ enum token_keyword {
 	KEYWORD_break,
 	KEYWORD_case,
 	KEYWORD_class,
-	KEYWORD_const,
 	KEYWORD_continue,
 	KEYWORD_default,
 	KEYWORD_do,
 	KEYWORD_else,
 	KEYWORD_enum,
-	KEYWORD_extern,
 	KEYWORD_for,
 	KEYWORD_goto,
 	KEYWORD_if,
 	KEYWORD_return,
-	KEYWORD_static,
 	KEYWORD_struct,
 	KEYWORD_switch,
 	KEYWORD_union,
@@ -79,10 +76,12 @@ enum token_keyword {
 };
 
 struct token {
-	unsigned char category;
-	unsigned char type;
+	unsigned short category;
+	unsigned short type;
+	unsigned int  diff;
+	unsigned int  offset;
+	/* Some tokens may leave this field empty. */
 	hash_t        specific;
-	char          *start;
 };
 
 /* Turns the chars into tokens, populates the structures */

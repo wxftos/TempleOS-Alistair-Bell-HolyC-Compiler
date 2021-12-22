@@ -9,13 +9,13 @@ out=holyc.$(make version).tar
 # Will clean any objects or binaries present with `make clean`.
 ls holyc && make clean
 # Remove old archives of the project.
-ls *.tar.gz | xargs -I {} rm {}
+ls *.tar.xz | xargs -I {} rm {}
 
 cd .. || (echo "script: error unable to go up a directory, check your rights!" ; exit 1)
 
 tar czf $out $src_dir 
-gzip -9 $out
+xz $out
 # Move the archive to the root of the project
-mv $out.gz $cwd
+mv $out.xz $cwd
 
 cd $cwd

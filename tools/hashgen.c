@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 static const char *types[] = {
+	"U0",
 	"U8",
 	"I8",
 	"U16",
@@ -65,7 +66,7 @@ dump_as_array(const struct out out[], const char *head, const char *name, unsign
 	DSTR(head, f);
 	for (i = 0; i < len; ++i) {
 		char tmp[128] = { 0 };
-		sprintf(tmp, "#define HASH_%s_%s (hash_t)%lu\n", name, out[i].str, out[i].hash);
+		sprintf(tmp, "#define HASH_%s_%s %llu\n", name, out[i].str, out[i].hash);
 		DSTR(tmp, f);
 	}
 }

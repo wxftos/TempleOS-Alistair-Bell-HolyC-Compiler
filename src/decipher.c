@@ -61,8 +61,7 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 		}
 		*out = (struct token) {
 			.category = TOKEN_SYMBOL,
-			.specific = diff,
-			.start    = raw_start,
+			.specific = *in,
 		};
 		return 0;
 	} 
@@ -72,8 +71,6 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 		*out = (struct token) {
 			.category = TOKEN_CONSTANT,
 			.type     = CONSTANT_STRING,
-			.start    = raw_start,
-			.specific = diff,
 		};
 		return 0;
 	}
@@ -86,8 +83,9 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 	}
 
 	/* If the string is not a numerical or string constant then it may be a predefined symbol or type. */
-	const hash_t hash_in = hash_chars(in);
+	hash_t hash_in = hash_chars(in);
 	switch (hash_in) {
+		CSET(HASH_TYPES_U0, TOKEN_TYPE, TYPE_U0);
 		CSET(HASH_TYPES_I8, TOKEN_TYPE, TYPE_I8);
 		CSET(HASH_TYPES_U8, TOKEN_TYPE, TYPE_U8);
 		CSET(HASH_TYPES_I16, TOKEN_TYPE, TYPE_I16);
@@ -101,23 +99,25 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 		CSET(HASH_KEYWORDS_break, TOKEN_KEYWORD, KEYWORD_break);
 		CSET(HASH_KEYWORDS_case, TOKEN_KEYWORD, KEYWORD_case);
 		CSET(HASH_KEYWORDS_class, TOKEN_KEYWORD, KEYWORD_class);
-		CSET(HASH_KEYWORDS_const, TOKEN_KEYWORD, KEYWORD_const);
+		CSET(HASH_KEYWORDS_const, TOKEN_MODIFIER, MODIFIER_const);
 		CSET(HASH_KEYWORDS_continue, TOKEN_KEYWORD, KEYWORD_continue);
 		CSET(HASH_KEYWORDS_default, TOKEN_KEYWORD, KEYWORD_default);
 		CSET(HASH_KEYWORDS_do, TOKEN_KEYWORD, KEYWORD_do);
 		CSET(HASH_KEYWORDS_else, TOKEN_KEYWORD, KEYWORD_else);
 		CSET(HASH_KEYWORDS_enum, TOKEN_KEYWORD, KEYWORD_enum);
-		CSET(HASH_KEYWORDS_extern, TOKEN_KEYWORD, KEYWORD_extern);
+		CSET(HASH_KEYWORDS_extern, TOKEN_MODIFIER, MODIFIER_extern);
 		CSET(HASH_KEYWORDS_for, TOKEN_KEYWORD, KEYWORD_for);
 		CSET(HASH_KEYWORDS_goto, TOKEN_KEYWORD, KEYWORD_goto);
 		CSET(HASH_KEYWORDS_if, TOKEN_KEYWORD, KEYWORD_if);
 		CSET(HASH_KEYWORDS_return, TOKEN_KEYWORD, KEYWORD_return);
-		CSET(HASH_KEYWORDS_static, TOKEN_KEYWORD, KEYWORD_static);
+		CSET(HASH_KEYWORDS_static, TOKEN_MODIFIER, MODIFIER_static);
 		CSET(HASH_KEYWORDS_struct, TOKEN_KEYWORD, KEYWORD_struct);
 		CSET(HASH_KEYWORDS_switch, TOKEN_KEYWORD, KEYWORD_switch);
 		CSET(HASH_KEYWORDS_union, TOKEN_KEYWORD, KEYWORD_union);
 		CSET(HASH_KEYWORDS_while, TOKEN_KEYWORD, KEYWORD_while);
 	}
 	/* New symbol. */
+	out->category = TOKEN_SYMBOL;
+	out->specific = hash_in;
 	return 0;
 }

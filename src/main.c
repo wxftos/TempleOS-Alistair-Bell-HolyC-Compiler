@@ -19,6 +19,7 @@
 #include "util.h"
 #include "args.h"
 #include "lexer.h"
+#include "parser.h"
 
 /* Opens the files, validates its present and not a dir, reads the chars into the buffer. */
 static int 
@@ -74,8 +75,8 @@ main(int argc, const char **argv)
 	}
 
 	/* Read the source file.
-	 * Fetch the chars that we can parse.
-	 */
+	* Fetch the chars that we can parse.
+	*/
 	const char *target = data.compiling;
 
 	char *chars = NULL;
@@ -85,15 +86,18 @@ main(int argc, const char **argv)
 	}
 
 	/*
-	 * Call the parse function.
-	 * This turns the chars into a series of identified tokens.
-	 * The parser is smart and will not split strings and can identify strings against numerical constants.
-	 */
-	 struct token *tokens; 
-	 unsigned int token_count = 0;
-	 if (lex_chars(chars, &tokens, &token_count) < 0) {
+	* Call the parse function.
+	* This turns the chars into a series of identified tokens.
+	* The parser is smart and will not split strings and can identify strings against numerical constants.
+	*/
+	struct token *tokens; 
+	unsigned int token_count = 0;
+	if (lex_chars(chars, &tokens, &token_count) < 0) {
 		return 1;
-	 }
+	}
+
+	parse_tokens(tokens, token_count, chars);
+
 
 	free(tokens);
 	free(chars);
