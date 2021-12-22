@@ -27,9 +27,15 @@ parse_tokens(struct token *tokens, unsigned int count, char *chars)
 	/* Loop through our tokens. */
 	for (i = tokens; i < tokens + count; ++i) {
 		if (i->category == TOKEN_MODIFIER) {
-			fprintf(stdout, "tokens[%2ld].type=%s.\n", i - tokens, modifier_str[i->type]);
+			fprintf(stdout, "tokens[%2d].type=%s.\n", i - tokens, modifier_str[i->type]);
+		} else if (i->category == TOKEN_CONSTANT) {
+			if (i->type == CONSTANT_INTEGER) {
+				fprintf(stdout, "tokens[%2d].specific=%ld.\n", i - tokens, (signed long long)i->specific);
+			} else if (i->type == CONSTANT_DECIMAL) {
+				fprintf(stdout, "tokens[%2d].specific=%.3ff.\n", i - tokens, (double)i->specific);
+			}
 		} else {
-			fprintf(stdout, "tokens[%2ld].category=%s.\n", i - tokens, category_str[i->category]);
+			fprintf(stdout, "tokens[%2d].category=%s.\n", i - tokens, category_str[i->category]);
 		}
 	}
 	return 0;

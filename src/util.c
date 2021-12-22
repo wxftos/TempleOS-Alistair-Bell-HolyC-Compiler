@@ -58,6 +58,7 @@ validate_numerical_constant(char *in, const unsigned int diff, unsigned *type)
 		return 0;
 	} else if (res) {
 		*type = CONSTANT_DECIMAL;
+		fprintf(stdout, "here\n");
 		return (hash_t)atof(in);
 	}
 	*type = CONSTANT_INTEGER;
@@ -74,7 +75,8 @@ validate_numerical_constant(char *in, const unsigned int diff, unsigned *type)
 		errno = -1;
 		fprintf(stderr, "error: trailing junk in numerical constant \'%s\', \'%c\' onwards.\n", in, *eptr);
 		return errno;
-	} else if (errno != 0) {
+	}
+	if (errno != 0) {
 		register int snap = errno;
 		fprintf(stderr, "error: numerical constant conversion failed, %s, \'%s\'.\n", strerror(errno), in);
 		return snap;
