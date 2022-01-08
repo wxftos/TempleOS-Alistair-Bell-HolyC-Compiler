@@ -58,8 +58,8 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 	register enum token_modifier mod = (enum token_modifier)target->type;
 	if (mod == MODIFIER_const) {
 		/* Means that the const modifier is already been applied. */
-		if (mach->active_modifiers & BIT(mod) != 0) {
-			if (mach->doubled_modifiers & BIT(mod) != 0) {
+		if ((mach->active_modifiers & BIT(mod)) != 0) {
+			if ((mach->doubled_modifiers & BIT(mod)) != 0) {
 				/* Throw an error that there are too many constant modifiers. */
 				mach->error.offender = target;
 				mach->error.val = ERROR_REPEATED_MODIFIER;
