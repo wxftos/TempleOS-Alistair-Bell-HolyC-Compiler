@@ -80,6 +80,7 @@ struct token {
 	unsigned short type;
 	unsigned int  diff;
 	unsigned int  offset;
+	unsigned int  line;
 	/* Some tokens may leave this field empty. */
 	hash_t        specific;
 };
@@ -87,5 +88,6 @@ struct token {
 /* Turns the chars into tokens, populates the structures */
 int lex_chars(char *, struct token **, unsigned int *);
 int lex_decipher(struct token *, char *, char *, unsigned int);
+unsigned int lex_get_line(const struct token *, char *);
 
 #endif

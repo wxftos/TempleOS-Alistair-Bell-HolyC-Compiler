@@ -38,12 +38,13 @@ struct machine {
 };
 
 static int 
-new_token(char *chars, char *start, const unsigned long diff, struct token *out)
+new_token(char *chars, char *start, const unsigned long diff, unsigned int line_num, struct token *out)
 {
 	char tmp[BUFF_SIZE] = { 0 };
 	strncpy(tmp, chars + (start - chars), diff);
 	out->offset = start - chars;
 	out->diff   = diff;
+	out->line   = line_num;
 	return lex_decipher(out, tmp, start, diff);
 }
 	
@@ -82,14 +83,15 @@ delim(char *in)
 static void
 lex_default(char *rchar, char *lchar, struct machine *machine)
 {
-	if (isspace(*rchar)) {
-		if (isspace(*lchar) || (rchar - machine->last_write) < 1) {
+	if (isspace(*rchar) != 0) {
+		if (isspace(*lchar) != 0 || (rchar - machine->last_write) < 1) {
 			++machine->last_write;
-		} else {
-			machine->new_token = 1;
-			machine->start[0] = machine->last_write;
-			machine->diff[0] = rchar - machine->last_write;
-		}
+			return;
+		} 
+		machine->new_token = 1;
+		machine->start[0] = machine->last_write;
+		machine->diff[0] = rchar - machine->last_write;
+		return;
 	} else {
 		int index = 0, res;
 		if ((res = delim(rchar)) < 1) {
@@ -161,17 +163,16 @@ change_mode:
 int
 lex_chars(char *in, struct token **out, unsigned int *count)
 {
+	unsigned int line_num = 1;
 	/* Keeps track of the allocation count of the returned buffer. */
 	unsigned int alloc_count = PREALLOC_SIZE;
 	/* Allows the insertion of tokens to fail and trigger the failure of the mainloop. */
 	signed int interupt = 0;
 
 	/* Like pinsors to extract strings and substrings. */
-	char *rchar = in;
-	char *lchar = in;
-	struct machine machine = { .last_write = &(*in) };
+	char *rchar = in, *lchar = in;
+	struct machine machine ={ .last_write = &(*in) };
 	*out = (struct token *)malloc(PREALLOC_SIZE * sizeof(*(*out)));
-	/* Output of where token data is stored. */
 	struct token *tptr = *out;
 
 	if (delim(in) == 2) {
@@ -180,10 +181,15 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 	} else {
 		machine.func = lex_default;
 	}
-	*count ^= *count;
 
+	if (isspace(*rchar)) {
+		++machine.last_write;
+	}
+
+	*count ^= *count;
 	do {
 		++rchar;
+		line_num += (*rchar == '\n');
 		machine.func(rchar, lchar, &machine);
 
 		if (machine.new_token > 0) {
@@ -192,13 +198,13 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 				*out = (struct token *)realloc(*out, alloc_count * sizeof(*(*out)));
 			}
 			/* Add the first one. */
-			interupt = new_token(in, machine.start[0], machine.diff[0], tptr);
+			interupt = new_token(in, machine.start[0], machine.diff[0], line_num, tptr);
 			++(*count);
 			++tptr;
 			if (interupt < 0)
 				return -1;
 			if (machine.new_token > 1) {
-				interupt = new_token(in, machine.start[1], machine.diff[1], tptr);
+				interupt = new_token(in, machine.start[1], machine.diff[1], line_num, tptr);
 				if (interupt < 0)
 					return -1;
 				++(*count);
@@ -207,7 +213,6 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 			machine.new_token = 0;
 			machine.last_write = rchar + 1;
 		}
-
 		lchar = rchar;
 	} while (*rchar != (char)0);
 	return interupt;

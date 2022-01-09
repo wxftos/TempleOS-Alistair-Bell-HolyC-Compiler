@@ -48,7 +48,7 @@ isfloat(char *in)
 }
 
 hash_t
-validate_numerical_constant(char *in, const unsigned int diff, unsigned *type)
+validate_numerical_constant(char *in, const unsigned int diff, unsigned *type, unsigned int line)
 {
 	/* Check wheter it*/
 	int res = isfloat(in);
@@ -73,12 +73,12 @@ validate_numerical_constant(char *in, const unsigned int diff, unsigned *type)
 	/* Whilst `strol(l)` does concatinate the garbage at the end of the string this will throw the error. */
 	if (*eptr != '\0') {
 		errno = -1;
-		fprintf(stderr, "error: trailing junk in numerical constant \'%s\', \'%c\' onwards.\n", in, *eptr);
+		fprintf(stderr, "error: trailing junk in numerical constant \'%s\', \'%c\' onwards, line %u\n", in, *eptr, line);
 		return errno;
 	}
 	if (errno != 0) {
 		register int snap = errno;
-		fprintf(stderr, "error: numerical constant conversion failed, %s, \'%s\'.\n", strerror(errno), in);
+		fprintf(stderr, "error: numerical constant conversion failed, %s, \'%s\', line %u\n", strerror(errno), in, line);
 		return snap;
 	}
 	return ret;

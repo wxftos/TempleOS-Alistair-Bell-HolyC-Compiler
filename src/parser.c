@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "defs.h"
+#include "util.h"
 
 static const char *category_str[] = {
 	[TOKEN_UNKNOWN] = "unknown",
@@ -26,7 +27,7 @@ static const char *error_str[] = {
 	[ERROR_SCOPE_VIOLATION]      = "violation to program scope",
 	[ERROR_EXPECTED_EXPRESSION]  = "expected expression",
 	[ERROR_REPEATED_MODIFIER]    = "repeated expression modifier",
-	[ERROR_CONFLICTING_MODIFIER] = "confliction modifiers applied",
+	[ERROR_CONFLICTING_MODIFIER] = "conflicting modifiers applied",
 };
 
 struct error {
@@ -54,7 +55,6 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 	 * Some assigment modifiers may be applied twice, or only once.
 	 * However modifiers such as `static` and `extern` conflict and will be invalid if apply in conjunction.
 	 */
-	
 	register enum token_modifier mod = (enum token_modifier)target->type;
 	if (mod == MODIFIER_const) {
 		/* Means that the const modifier is already been applied. */
@@ -83,24 +83,14 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 	mach->active_modifiers |= BIT(mod);
 	return 0;
 }
-
-static unsigned int
-get_line(const char *chars, struct token *target)
-{
-	unsigned int i = 0, acc = 1;
-	for (; i < target->offset; ++i) {
-		acc += (chars[i] == '\n');
-	}
-	return acc;
-}
 static int
 throw_error(struct state_machine *mach)
 {
 	char cpy[256];
-	register struct token *t = mach->error.offender;
+	register struct token const *t = mach->error.offender;
 	strncpy(cpy, src_chars + t->offset, t->diff);
 	cpy[t->diff] = (char)0;
-	fprintf(stderr, "error: parser violation, %s, offender \'%s\', line %u!\n", error_str[(int)mach->error.val], cpy, get_line(src_chars, t));
+	fprintf(stderr, "error: parser violation, %s, offender \'%s\', line %u!\n", error_str[(int)mach->error.val], cpy, t->line);
 	return -1;
 }
 static int
