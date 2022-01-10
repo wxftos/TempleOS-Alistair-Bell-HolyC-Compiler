@@ -48,7 +48,7 @@ isfloat(char *in)
 }
 
 hash_t
-validate_numerical_constant(char *in, const unsigned int diff, unsigned *type, unsigned int line)
+validate_numerical_constant(char *in, unsigned *type, unsigned int line)
 {
 	/* Check wheter it*/
 	int res = isfloat(in);

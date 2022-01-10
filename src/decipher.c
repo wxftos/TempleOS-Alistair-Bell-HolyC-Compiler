@@ -78,7 +78,7 @@ lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
 	if (isdigit(*in)) {
 		errno = 0;
 		out->category = TOKEN_CONSTANT;
-		out->specific = (hash_t)validate_numerical_constant(in, diff, (unsigned int *)&out->type, out->line);
+		out->specific = (hash_t)validate_numerical_constant(in, (unsigned int *)&out->type, out->line);
 		return (errno == 0) - 1;
 	}
 

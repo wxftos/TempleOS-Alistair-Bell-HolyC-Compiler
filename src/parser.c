@@ -1,39 +1,8 @@
 #include "parser.h"
+#include "parser_errors.h"
 #include "defs.h"
 #include "util.h"
 
-static const char *category_str[] = {
-	[TOKEN_UNKNOWN] = "unknown",
-	[TOKEN_KEYWORD] = "keyword",
-	[TOKEN_MODIFIER] = "modifier",
-	[TOKEN_SYMBOL] = "symbol",
-	[TOKEN_TYPE] = "type",
-	[TOKEN_OPERATOR] = "operator",
-	[TOKEN_ASSIGNMENT] = "assignment",
-	[TOKEN_SCOPER] = "scoper",
-	[TOKEN_TERMINATOR] = "terminator",
-	[TOKEN_CONSTANT] = "constant",
-};
-
-enum error_type {
-	ERROR_UNDEFINED_REFERENCE,
-	ERROR_SCOPE_VIOLATION,
-	ERROR_EXPECTED_EXPRESSION,
-	ERROR_REPEATED_MODIFIER,
-	ERROR_CONFLICTING_MODIFIER,
-};
-static const char *error_str[] = {
-	[ERROR_UNDEFINED_REFERENCE]  = "undefined reference",
-	[ERROR_SCOPE_VIOLATION]      = "violation to program scope",
-	[ERROR_EXPECTED_EXPRESSION]  = "expected expression",
-	[ERROR_REPEATED_MODIFIER]    = "repeated expression modifier",
-	[ERROR_CONFLICTING_MODIFIER] = "conflicting modifiers applied",
-};
-
-struct error {
-	struct token *offender;
-	enum error_type val;
-};
 struct state_machine {
 	struct error error;
 	unsigned int active_modifiers;
@@ -42,7 +11,6 @@ struct state_machine {
 	unsigned int scope_global;
 	unsigned int scope_index;
 };
-
 static const char *src_chars;
 
 #define BIT(x) \
@@ -62,7 +30,7 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 			if ((mach->doubled_modifiers & BIT(mod)) != 0) {
 				/* Throw an error that there are too many constant modifiers. */
 				mach->error.offender = target;
-				mach->error.val = ERROR_REPEATED_MODIFIER;
+				mach->error.value = ERROR_REPEATED_MODIFIER;
 				return -1;
 			} else {
 				mach->doubled_modifiers |= BIT(mod);
@@ -76,7 +44,7 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 		};
 		if ((mach->active_modifiers & BIT(mapping[mod])) != 0) {
 			mach->error.offender = target;
-			mach->error.val = ERROR_CONFLICTING_MODIFIER;
+			mach->error.value = ERROR_CONFLICTING_MODIFIER;
 			return -1;
 		}
 	}
@@ -90,7 +58,7 @@ throw_error(struct state_machine *mach)
 	register struct token const *t = mach->error.offender;
 	strncpy(cpy, src_chars + t->offset, t->diff);
 	cpy[t->diff] = (char)0;
-	fprintf(stderr, "error: parser violation, %s, offender \'%s\', line %u!\n", error_str[(int)mach->error.val], cpy, t->line);
+	fprintf(stderr, "error: parser violation, %s, offender \'%s\', line %u!\n", error_str[(int)mach->error.value], cpy, t->line);
 	return -1;
 }
 static int
