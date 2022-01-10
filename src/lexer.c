@@ -48,7 +48,7 @@ new_token(char *chars, char *start, const unsigned long diff, unsigned int line_
 		.diff   = diff,
 		.line   = line_num,
 	};
-	return lex_decipher(out, char_buffer, start, diff);
+	return lex_decipher(out, char_buffer);
 }
 static int 
 delim(char *in)
@@ -190,8 +190,8 @@ lex_chars(char *in, struct token **out, unsigned int *count)
 	}
 
 	do {
-		++rchar;
 		line_num += (*rchar == '\n');
+		++rchar;
 		machine.func(rchar, lchar, &machine);
 
 		if (machine.new_token > 0) {

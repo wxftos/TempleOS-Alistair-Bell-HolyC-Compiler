@@ -27,18 +27,18 @@ handle_file(const char *file, char **chars, unsigned long *char_count)
 {
 	struct stat sbuff = { 0 };
 	if (stat(file, &sbuff) < 0) {
-		fprintf(stderr, "error: unable to find file %s, does it exist?\n", file);
+		fprintf(stderr, "error: unable to find file \'%s\', does it exist?\n", file);
 		return -1;
 	}
 	if (S_ISDIR(sbuff.st_mode)) {
-		fprintf(stderr, "error: %s is directory, cannot compile a directory!\n", file);
+		fprintf(stderr, "error: \'%s\' is directory, cannot compile a directory!\n", file);
 		return -1;
 	}
 
 	FILE *f = fopen(file, "r");
 	if (f == NULL) {
 		register int snapshot = errno;
-		fprintf(stderr, "error: fopen failed on %s, %s.\n", file, strerror(snapshot));	
+		fprintf(stderr, "error: fopen failed on \'%s\', %s.\n", file, strerror(snapshot));	
 		return -1;
 	}
 	

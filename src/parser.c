@@ -30,7 +30,7 @@ struct state_machine {
 };
 static const char *src_chars;
 
-#define BIT(x) \
+#define BIT_MASK(x) \
 	(1 << ((unsigned int)x))
 
 static int
@@ -43,14 +43,14 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 	register enum token_modifier mod = (enum token_modifier)target->type;
 	if (mod == MODIFIER_const) {
 		/* Means that the const modifier is already been applied. */
-		if ((mach->active_modifiers & BIT(mod)) != 0) {
-			if ((mach->doubled_modifiers & BIT(mod)) != 0) {
+		if ((mach->active_modifiers & BIT_MASK(mod)) != 0) {
+			if ((mach->doubled_modifiers & BIT_MASK(mod)) != 0) {
 				/* Throw an error that there are too many constant modifiers. */
 				mach->error.offender = target;
 				mach->error.value = ERROR_REPEATED_MODIFIER;
 				return -1;
 			} else {
-				mach->doubled_modifiers |= BIT(mod);
+				mach->doubled_modifiers |= BIT_MASK(mod);
 				return 0;
 			}
 		} 
@@ -59,13 +59,13 @@ validate_new_modifiers(struct token *target, struct state_machine *mach)
 			[MODIFIER_static] = MODIFIER_extern,
 			[MODIFIER_extern] = MODIFIER_static,
 		};
-		if ((mach->active_modifiers & BIT(mapping[mod])) != 0) {
+		if ((mach->active_modifiers & BIT_MASK(mapping[mod])) != 0) {
 			mach->error.offender = target;
 			mach->error.value = ERROR_CONFLICTING_MODIFIER;
 			return -1;
 		}
 	}
-	mach->active_modifiers |= BIT(mod);
+	mach->active_modifiers |= BIT_MASK(mod);
 	return 0;
 }
 static int
@@ -76,7 +76,7 @@ throw_error(struct state_machine *mach)
 	strncpy(cpy, src_chars + t->offset, t->diff);
 	cpy[t->diff] = (char)0;
 	fprintf(stderr, "error: parser violation, %s, offender \'%s\', line %u!\n", error_str[(int)mach->error.value], cpy, t->line);
-	return -1;
+	return ~0;
 }
 static int
 parse_expression(struct token *tail, struct token *head, struct state_machine *mach)

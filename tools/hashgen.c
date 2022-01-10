@@ -75,7 +75,7 @@ int
 main(int argc, const char *argv[])
 {
 	if (argc < 2) {
-		fprintf(stderr,"error: no output specified.\n");
+		fprintf(stderr,"error: no output file specified.\n");
 		return 1;
 	}
 	/* Save compile clock cycles. */
@@ -100,16 +100,11 @@ main(int argc, const char *argv[])
 		out_keywords[i].hash = hash_chars((char *) keywords[i]);
 	}
 
-	/* Sort 
-	qsort(out_types, types_len, sizeof(struct out), sort_func);
-	qsort(out_keywords, keywords_len, sizeof(struct out), sort_func);
-	*/
-
 	/* Dump. */
 	FILE *f = fopen(argv[1], "w");
 	if (!f) {
 		register int snap = errno;
-		fprintf(stderr, "error: cannot dum to %s, %s.\n", argv[1], strerror(snap));
+		fprintf(stderr, "error: cannot dump to %s. %s.\n", argv[1], strerror(snap));
 		return 1;
 	}
 	DSTR(dump_header, f);

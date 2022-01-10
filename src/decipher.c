@@ -46,10 +46,57 @@ static const unsigned char single_lookup[][2] = {
 		return 0;                \
 	} 
 
-int
-lex_decipher(struct token *out, char *in, char *raw_start, unsigned int diff)
+static unsigned int
+isfloat(char *src)
 {
-	if (diff == 1) {
+	char *ptr = &src[0];
+	unsigned int dec_count = 0;
+	while (*(++ptr) != '\0') {
+		dec_count += *ptr == '.';
+	}
+	return dec_count;
+}
+
+static hash_t
+validate_numerical_constant(char *in, unsigned *type, unsigned int line)
+{
+	/* Check whether it is an floating point constant. */
+	int res = isfloat(in);
+	if (res > 1) {
+		fprintf(stderr, "error: floating point value \'%s\' has too many decimal points, line %u!\n", in, line);
+		errno = -1;
+		return 0;
+	} else if (res) {
+		*type = CONSTANT_DECIMAL;
+		return (hash_t)atof(in);
+	}
+	*type = CONSTANT_INTEGER;
+	char *eptr;
+	hash_t ret;
+
+#ifdef _DEFAULT_SOURCE
+	ret = (hash_t)strtoll(in, &eptr, 0);
+#else 
+	ret = (hash_t)strtol(in, &eptr, 0);
+#endif
+	/* Whilst `strol(l)` does concatinate the garbage at the end of the string this will throw the error. */
+	if (*eptr != '\0') {
+		errno = -1;
+		fprintf(stderr, "error: trailing junk in numerical constant \'%s\', \'%c\' onwards, line %u!\n", in, *eptr, line);
+		return errno;
+	}
+	if (errno != 0) {
+		register int snap = errno;
+		fprintf(stderr, "error: numerical constant conversion failed, %s, \'%s\', line %u!\n", strerror(errno), in, line);
+		return snap;
+	}
+	return ret;
+}
+
+int
+lex_decipher(struct token *out, char *in)
+{
+	if (out->diff == 1) {
 		if (single_lookup[(int)*in][0] != 0) {
 			/* Special character. */			
 			*out = (struct token) {

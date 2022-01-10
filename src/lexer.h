@@ -104,7 +104,7 @@ struct token {
 
 /* Turns the chars into tokens, populates the structures */
 int lex_chars(char *, struct token **, unsigned int *);
-int lex_decipher(struct token *, char *, char *, unsigned int);
+int lex_decipher(struct token *, char *);
 unsigned int lex_get_line(const struct token *, char *);
 
 #endif
