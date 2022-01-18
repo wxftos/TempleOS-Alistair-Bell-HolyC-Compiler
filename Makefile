@@ -41,4 +41,4 @@ info:
 	@echo "LDFLAGS -> ${LDFLAGS}"
 	@echo "LDLIBS  -> ${LDLIBS}"
 
-.PHONY: clean install uninstall version build_info tools
+.PHONY: clean install uninstall version info tools

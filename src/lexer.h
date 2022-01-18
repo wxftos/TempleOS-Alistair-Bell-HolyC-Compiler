@@ -21,90 +21,90 @@
 #include "inc.h"
 #include "util.h"
 
-/* What category it falls into. */
-enum token_category {
-	TOKEN_UNKNOWN,
-	TOKEN_KEYWORD,
-	TOKEN_MODIFIER,
-	TOKEN_SYMBOL,
-	TOKEN_TYPE,
-	TOKEN_OPERATOR,
-	TOKEN_ASSIGNMENT,
-	TOKEN_SCOPER,
+enum tokens {
+	TOKEN_UNDEFINED = 0,
+	/* Predefined system types. */
+	TOKEN_U0,
+	TOKEN_U8, TOKEN_I8,
+	TOKEN_U16, TOKEN_I16,
+	TOKEN_U32, TOKEN_I32,
+	TOKEN_U64, TOKEN_I64,
+	TOKEN_F64,
+	TOKEN_BOOLEAN,
+	/* Language keywowrds. */
+	TOKEN_BREAK,
+	TOKEN_CASE,
+	TOKEN_CLASS,
+	TOKEN_CONST,
+	TOKEN_CONTINUE,
+	TOKEN_DEFAULT,
+	TOKEN_DO,
+	TOKEN_ELSE,
+	TOKEN_ENUM,
+	TOKEN_EXTERN,
+	TOKEN_FOR,
+	TOKEN_GOTO,
+	TOKEN_IF,
+	TOKEN_RETURN,
+	TOKEN_STATIC,
+	TOKEN_STRUCT,
+	TOKEN_SWITCH,
+	TOKEN_UNION,
+	TOKEN_WHILE,
+	/* Scopers. */
+	TOKEN_LPARAM, TOKEN_RPARAM,
+	TOKEN_LINDEX, TOKEN_RINDEX,
+	TOKEN_LCURLY, TOKEN_RCURLY,
+	/* Terminators and assignments. */
+	TOKEN_EQUALS,
 	TOKEN_TERMINATOR,
+	/* Math operators. */
+	TOKEN_ADD, TOKEN_SUB, TOKEN_MUL, TOKEN_DIV,
+	/* Bitwise. */
+	TOKEN_LSHIFT,
+	TOKEN_RSHIFT,
+	TOKEN_XOR,
+	TOKEN_AND,
+	TOKEN_OR,
+	TOKEN_1_COMP,
+	/* Comparitives.  */
+	TOKEN_LTHAN,
+	TOKEN_GTHAN,
+	TOKEN_NOT,
+	/* Runtime generated stuff. */
+	TOKEN_SYMBOL,
 	TOKEN_CONSTANT,
+	/* Dummy. */
+	TOKEN_MAX,
 };
-/* Types. */
-enum token_type {
-	TYPE_U0,
-	TYPE_U8,
-	TYPE_U16,
-	TYPE_U32,
-	TYPE_U64,
-	TYPE_I8,
-	TYPE_I16,
-	TYPE_I32,
-	TYPE_I64,
-	TYPE_F64,
-	TYPE_BOOLEAN,
-};
-/* Types of constants: 0.0f, 10, "hello" etc. */
+
 enum token_constant {
 	CONSTANT_STRING,
 	CONSTANT_INTEGER,
 	CONSTANT_DECIMAL,
 };
-enum token_modifier {
-	/* Declaration modifiers. */
-	MODIFIER_const,
-	MODIFIER_static,
-	MODIFIER_extern,
-};
-enum token_operator {
-	OPERATOR_ADD,
-	OPERATOR_SUB,
-	OPERATOR_MUL,
-	OPERATOR_DIV,
-	OPERATOR_MOD,
-	OPERATOR_AND,
-	OPERATOR_OR,
-	OPERATOR_XOR,
-	OPERATOR_OC,
-	OPERATOR_GT,
-	OPERATOR_LT,
-};
-enum token_keyword {
-	KEYWORD_break,
-	KEYWORD_case,
-	KEYWORD_class,
-	KEYWORD_continue,
-	KEYWORD_default,
-	KEYWORD_do,
-	KEYWORD_else,
-	KEYWORD_enum,
-	KEYWORD_for,
-	KEYWORD_goto,
-	KEYWORD_if,
-	KEYWORD_return,
-	KEYWORD_struct,
-	KEYWORD_switch,
-	KEYWORD_union,
-	KEYWORD_while,
+
+enum token_category {
+	CATEGORY_KEYWORD,
+	CATEGORY_OPERATOR,
+	CATEGORY_TYPE,
+	CATEGORY_COMPARISON,
+	CATEGORY_SCOPER,
+	CATEGORY_MISC,
 };
 
 struct token {
-	unsigned short category;
 	unsigned short type;
-	unsigned int  diff;
-	unsigned int  offset;
-	unsigned int  line;
+	unsigned short category;
+	unsigned int   diff;
+	unsigned int   offset;
+	unsigned int   line;
 	/* Some tokens may leave this field empty. */
-	hash_t        specific;
+	hash_t         specific;
 };
 
 /* Turns the chars into tokens, populates the structures */
 int lex_chars(char *, struct token **, unsigned int *);
 int lex_decipher(struct token *, char *);
-unsigned int lex_get_line(const struct token *, char *);
 
 #endif

@@ -38,13 +38,19 @@ handle_file(const char *file, char **chars, unsigned long *char_count)
 	FILE *f = fopen(file, "r");
 	if (f == NULL) {
 		register int snapshot = errno;
-		fprintf(stderr, "error: fopen failed on \'%s\', %s.\n", file, strerror(snapshot));	
+		fprintf(stderr, "error: fopen failed on \'%s\'. %s.\n", file, strerror(snapshot));	
 		return -1;
 	}
 	
 	(void)fseek(f, 0, SEEK_END);
 	*char_count = ftell(f);
 	*chars = (char *)malloc((*char_count + 1) * sizeof(char));
+	if (!(*chars)) {
+		/* While posix malloc may only yield a single errno, some implimentations may have more than 1 result, it would be foolish to assume that it was just ENOMEM. */
+		fprintf(stderr, "error: failed to allocate chars buffer. %s.\n", strerror(errno));
+		return -1;
+	}
+
 	/* Rewind the file pointer. */
 	rewind(f);
 	/* Read our data into the char buffer. */
@@ -78,11 +84,9 @@ main(int argc, const char **argv)
 	 * Read the source file.
 	 * Fetch the chars that we can parse.
 	 */
-	const char *target = data.compiling;
-
 	char *chars = NULL;
 	unsigned long char_count = 0;
-	if (handle_file(target, &chars , &char_count) < 0) {
+	if (handle_file(data.compiling, &chars , &char_count) < 0) {
 		return 1;
 	}
 
@@ -97,8 +101,12 @@ main(int argc, const char **argv)
 		return 1;
 	}
 
-	parse_tokens(tokens, token_count, chars);
-
+	/* 
+	 * Parses tokens into low level instructions that then can be translated into bytecode by the backend. 
+	 */
+	if (parse_tokens(tokens, token_count, chars) < 0) {
+		return 1;
+	}
 
 	free(tokens);
 	free(chars);
