@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 #include "inc.h"
 #include "util.h"
 #include "args.h"
@@ -64,6 +63,8 @@ handle_file(const char *file, char **chars, unsigned long *char_count)
 int
 main(int argc, const char **argv)
 {
+	__progname = "holyc";
+
 	/* Check that we actually got an argument. */
 	if (argc < 2) {
 		arguments_help();	

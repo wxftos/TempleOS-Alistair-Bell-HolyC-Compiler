@@ -11,3 +11,7 @@ src/defs.h
 *.core
 *.tar*
 
+*.exe
+debug
+release
+x64

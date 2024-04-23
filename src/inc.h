@@ -26,14 +26,14 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/utsname.h>
+/*#include <sys/utsname.h>*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <ctype.h>
 
 #define ARRAY_LEN(arr)  \

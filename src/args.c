@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <getopt.h>
+//#include <getopt.h>
 
 #include "args.h"
-
+#define HOLYC_BUILD_VERSION "0.0.17"
 #define ARGUMENTS_HELP_STRING "c:hv"
 #define ARGUMENTS_HELP_PRETTY "chv"
-
+char*__progname;
 void
 arguments_help(void)
 {
@@ -30,16 +30,19 @@ arguments_help(void)
 void
 arguments_version(void)
 {
+	#if 0
 	struct utsname u;
 	uname(&u);
 	fprintf(stdout, "version: %s, platform %s, runtime arch %s.\n", HOLYC_BUILD_VERSION, u.sysname, u.machine);
+	#endif
+	fprintf(stdout, "version: %s, platform windows, runtime arch x86.\n", HOLYC_BUILD_VERSION);
 }
 int
 arguments_handle(const int argc, const char **argv, struct arguments_data *data)
 {
 	/* Disable error message, use custom instead. */
-	opterr = 0;
-
+	int opterr = 0;
+#if 0
 	int opt;
 	while ((opt = getopt(argc, (char *const *)argv, ARGUMENTS_HELP_STRING)) != -1) {
 		switch ((char)opt) {
@@ -63,5 +66,6 @@ arguments_handle(const int argc, const char **argv, struct arguments_data *data)
 			}
 		}
 	}
+#endif
 	return -2;
 }
